@@ -29,7 +29,7 @@ cid = p.connect(p.GUI_SERVER)
 
 #disable rendering during creation.
 p.configureDebugVisualizer(p.COV_ENABLE_RENDERING, 0)
-
+p.configureDebugVisualizer(p.COV_ENABLE_KEYBOARD_SHORTCUTS,0)
 #white background
 #p.configureDebugVisualizer(rgbBackground=[1,1,1])
 p.setAdditionalSearchPath(pd.getDataPath())
@@ -110,7 +110,8 @@ if load_a1:
   
 
 #press 'G' or use the following line to hide the GUI
-#p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
+p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
+
 #disable tinyrenderer, software (CPU) renderer, we don't use it here
 p.configureDebugVisualizer(p.COV_ENABLE_TINY_RENDERER, 0)
 
@@ -180,5 +181,6 @@ while p.isConnected():
     #if (cam_skip>cam_skip_frames):
     #  p.getCameraImage(320,200)#, renderer=p.ER_BULLET_HARDWARE_OPENGL)
     #  cam_skip=0
+    p.setGravity(0,0,-10)
     cam_skip+=1
     time.sleep(0.001)
