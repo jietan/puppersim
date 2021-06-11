@@ -71,7 +71,7 @@
 	<link name="leftRearLeg">
 		<inertial>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.015  0.00000"/>
-			<mass value="0.50000"/>
+			<mass value="0.20000"/>
 			<inertia ixx="0.00017" ixy="0" ixz="0" iyy="0.00022" iyz="0" izz="0.00022"/>
 		</inertial>
 		<visual>
@@ -179,7 +179,7 @@
 	<link name="rightRearLeg">
 		<inertial>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.015  0.00000"/>
-			<mass value="0.50000"/>
+			<mass value="0.20000"/>
 			<inertia ixx="0.00017" ixy="0" ixz="0" iyy="0.00022" iyz="0" izz="0.00022"/>
 		</inertial>
 		<visual>
@@ -285,7 +285,7 @@
 	<link name="leftFrontLeg">
 		<inertial>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.015  0.00000"/>
-			<mass value="0.50000"/>
+			<mass value="0.20000"/>
 			<inertia ixx="0.00018" ixy="0" ixz="0" iyy="0.00023" iyz="0" izz="0.00022"/>
 		</inertial>
 		<visual>
@@ -391,7 +391,7 @@
 	<link name="rightFrontLeg">
 		<inertial>
 			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.015  0.00000"/>
-			<mass value="0.50000"/>
+			<mass value="0.20000"/>
 			<inertia ixx="0.00018" ixy="0" ixz="0" iyy="0.00023" iyz="0" izz="0.00022"/>
 		</inertial>
 		<visual>
@@ -490,92 +490,104 @@
 		</collision>
 	</link>
 	
-		<joint name="rightFrontLegMotor" type="continuous">
+  <joint name="rightFrontLegMotor" type="revolute">
 		<parent link="pupper_v2_dji_chassis"/>
 		<child link="rightFrontLeg"/>
 		<dynamics damping="0.0" friction="0.0001"/>
 		<origin rpy="0.00000 -0.00000 0.00000" xyz="-0.04645 -0.06686 0.00483"/>
 		<axis xyz="0.00000 -1.00000 0.00000"/>
+		<limit effort="100" velocity="100" lower="-0.2" upper=".2"/>
 	</joint>
-	<joint name="rightFrontUpperLegMotor" type="continuous">
+	<joint name="rightFrontUpperLegMotor" type="revolute">
 		<parent link="rightFrontLeg"/>
 		<child link="rightFrontUpperLeg"/>
 		<dynamics damping="0.0" friction="0.0001"/>
 		<origin rpy="0.00000 -0.00000 0.00000" xyz="-0.02500 0.02000 -0.00500"/>
 		<axis xyz="1.00000 0.00000 0.00000"/>
+		<limit effort="100" velocity="100" lower="0.0" upper=".8"/>
 	</joint>
-	<joint name="rightFrontLowerLegMotor" type="continuous">
+	<joint name="rightFrontLowerLegMotor" type="revolute">
 		<parent link="rightFrontUpperLeg"/>
 		<child link="rightFrontLowerLeg"/>
 		<dynamics damping="0.0" friction="0.0001"/>
 		<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 -0.08000"/>
 		<axis xyz="1.00000 0.00000 0.00000"/>
+		<limit effort="100" velocity="100" lower="-2.4" upper="-.5"/>
 	</joint>
 	
-	<joint name="leftFrontLegMotor" type="continuous">
+	<joint name="leftFrontLegMotor" type="revolute">
 		<parent link="pupper_v2_dji_chassis"/>
 		<child link="leftFrontLeg"/>
 		<dynamics damping="0.0" friction="0.0001"/>
 		<origin rpy="0.00000 -0.00000 0.00000" xyz="0.04645 -0.06686 0.00483"/>
 		<axis xyz="0.00000 -1.00000 0.00000"/>
+		<limit effort="100" velocity="100" lower="-0.2" upper=".2"/>
 	</joint>
-	<joint name="leftFrontUpperLegMotor" type="continuous">
+	<joint name="leftFrontUpperLegMotor" type="revolute">
 		<parent link="leftFrontLeg"/>
 		<child link="leftFrontUpperLeg"/>
 		<dynamics damping="0.0" friction="0.0001"/>
 		<origin rpy="0.00000 -0.00000 0.00000" xyz="0.02500 0.02000 -0.00500"/>
 		<axis xyz="1.00000 0.00000 0.00000"/>
+		<limit effort="100" velocity="100" lower="0.0" upper=".8"/>
 	</joint>
-	<joint name="leftFrontLowerLegMotor" type="continuous">
+	<joint name="leftFrontLowerLegMotor" type="revolute">
 		<parent link="leftFrontUpperLeg"/>
 		<child link="leftFrontLowerLeg"/>
 		<dynamics damping="0.0" friction="0.0001"/>
 		<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 -0.08000"/>
 		<axis xyz="1.00000 0.00000 0.00000"/>
+		<limit effort="100" velocity="100" lower="-2.4" upper="-.5"/>
 	</joint>
 	
 	
-	<joint name="rightRearLegMotor" type="continuous">
+	<joint name="rightRearLegMotor" type="revolute">
 		<parent link="pupper_v2_dji_chassis"/>
 		<child link="rightRearLeg"/>
 		<dynamics damping="0.0" friction="0.0001"/>
 		<origin rpy="0.00000 -0.00000 0.00000" xyz="-0.04645 0.13313 0.00483"/>
 		<axis xyz="0.00000 -1.00000 0.00000"/>
+		<limit effort="100" velocity="100" lower="-0.2" upper=".2"/>
 	</joint>
-	<joint name="rightRearUpperLegMotor" type="continuous">
+	<joint name="rightRearUpperLegMotor" type="revolute">
 		<parent link="rightRearLeg"/>
 		<child link="rightRearUpperLeg"/>
 		<dynamics damping="0.0" friction="0.0001"/>
 		<origin rpy="0.00000 -0.00000 0.00000" xyz="-0.02500 0.02000 -0.00500"/>
 		<axis xyz="1.00000 0.00000 0.00000"/>
+		<limit effort="100" velocity="100" lower="0.0" upper=".8"/>
 	</joint>
-	<joint name="rightRearLowerLegMotor" type="continuous">
+	<joint name="rightRearLowerLegMotor" type="revolute">
 		<parent link="rightRearUpperLeg"/>
 		<child link="rightRearLowerLeg"/>
 		<dynamics damping="0.0" friction="0.0001"/>
 		<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 -0.08000"/>
 		<axis xyz="1.00000 0.00000 0.00000"/>
+		<limit effort="100" velocity="100" lower="-2.4" upper="-.5"/>
 	</joint>
-	<joint name="leftRearLegMotor" type="continuous">
+	<joint name="leftRearLegMotor" type="revolute">
 		<parent link="pupper_v2_dji_chassis"/>
 		<child link="leftRearLeg"/>
 		<dynamics damping="0.0" friction="0.0001"/>
 		<origin rpy="0.00000 -0.00000 0.00000" xyz="0.04645 0.13313 0.00483"/>
 		<axis xyz="0.00000 -1.00000 0.00000"/>
+		<limit effort="100" velocity="100" lower="-0.2" upper=".2"/>
 	</joint>
-	<joint name="leftRearUpperLegMotor" type="continuous">
+	<joint name="leftRearUpperLegMotor" type="revolute">
 		<parent link="leftRearLeg"/>
 		<child link="leftRearUpperLeg"/>
 		<dynamics damping="0.0" friction="0.0001"/>
 		<origin rpy="0.00000 -0.00000 0.00000" xyz="0.02500 0.02000 -0.00500"/>
 		<axis xyz="1.00000 0.00000 0.00000"/>
+		<limit effort="100" velocity="100" lower="0.0" upper=".8"/>
 	</joint>
-	<joint name="leftRearLowerLegMotor" type="continuous">
+	<joint name="leftRearLowerLegMotor" type="revolute">
 		<parent link="leftRearUpperLeg"/>
 		<child link="leftRearLowerLeg"/>
 		<dynamics damping="0.0" friction="0.0001"/>
 		<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 -0.08000"/>
 		<axis xyz="1.00000 0.00000 0.00000"/>
+		<limit effort="100" velocity="100" lower="-2.4" upper="-.5"/>
 	</joint>
 	<joint name="leftRearToe" type="fixed">
 		<parent link="leftRearLowerLeg"/>

@@ -23,14 +23,15 @@ from __future__ import print_function
 import collections
 import gin
 
-URDF_PATH = "pupper_v2a.urdf" #or pupper_v2b with toes, but no visual meshes
+import puppersim.data as pd
+URDF_PATH = pd.getDataPath()+"/pupper_v2a.urdf" #or pupper_v2b with toes, but no visual meshes
 
 NUM_MOTORS = 12
 NUM_LEGS = 4
 MOTORS_PER_LEG = 3
 
 INIT_RACK_POSITION = [0, 0, 1]
-INIT_POSITION = [0, 0, 0.2]
+INIT_POSITION = [0, 0, 0.17]
 
 # Will be default to (0, 0, 0, 1) once the new laikago_toes_zup.urdf checked in.
 INIT_ORIENTATION = [0, 0, 0, 1]
@@ -111,7 +112,7 @@ MOTOR_GROUP = collections.OrderedDict((
 ))
 
 # Regulates the joint angle change when in position control mode.
-MAX_MOTOR_ANGLE_CHANGE_PER_STEP = 0.12
+MAX_MOTOR_ANGLE_CHANGE_PER_STEP = 0.02
 
 # The hip joint location in the CoM frame.
 HIP_POSITIONS = collections.OrderedDict((

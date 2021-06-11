@@ -52,13 +52,14 @@ def run_example(num_max_steps=_NUM_STEPS):
   """
   env = env_loader.load()
   env.seed(_ENV_RANDOM_SEED)
+  print("env.action_space=",env.action_space)
   observation = env.reset()
   policy = static_gait_controller.StaticGaitController(env.robot)
     
   for _ in range(num_max_steps):
     #action = policy.act(observation)
     action = [0, 0.6,-1.2,0, 0.6,-1.2,0, 0.6,-1.2,0, 0.6,-1.2]
-    _, _, done, _ = env.step(action)
+    obs, reward, done, _ = env.step(action)
     time.sleep(0.01)
     if done:
       break

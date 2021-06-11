@@ -16,11 +16,12 @@
 # Lint as: python3
 """Add the new Pupper robot."""
 import gin
-
+import gym
+import numpy as np
 from puppersim import pupper_constants
 from pybullet_envs.minitaur.robots import quadruped_base
 from pybullet_envs.minitaur.robots import robot_urdf_loader
-
+from pybullet_envs.minitaur.robots import robot_config
 
 @gin.configurable
 class Pupper(quadruped_base.QuadrupedBase):
@@ -43,6 +44,19 @@ class Pupper(quadruped_base.QuadrupedBase):
         user_group=pupper_constants.MOTOR_GROUP,
     )
 
+
+  def _build_action_space(self):
+     """Builds the action space of the robot using the motor limits."""
+     if self._motor_control_mode == robot_config.MotorControlMode.POSITION:
+      self._action_space = gym.spaces.Box(
+          low=np.array([-0.18,0.1,-2.3]*4),#-0.0,#self._motor_limits.angle_lower_limits,
+          high=np.array([0.18,0.7,-0.6]*4),#0.001  ,#self._motor_limits.angle_upper_limits,
+          shape=(self._num_motors,),
+          dtype=np.float32)  # TODO(b/159160184) Make dtype configurable.
+      self._action_names = tuple(
+          "POSITION_{}".format(motor) for motor in self._motor_id_dict.keys())
+     else:
+        raise NotImplementedError("Not yet implemented!")
   def get_neutral_motor_angles():
     ABDUCTION_ANGLE=0
     HIP_ANGLE=0.6
