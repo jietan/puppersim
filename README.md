@@ -22,4 +22,13 @@ Keyboard controls:
 
 ## Training a Gym environment
 
-Todo: see pupper_example.py and the [Minitaur/Laikago environments](https://github.com/bulletphysics/bullet3/tree/master/examples/pybullet/gym/pybullet_envs/minitaur/envs_v2) as example.
+You can train the pupper using pybullet [envs_v2](https://github.com/bulletphysics/bullet3/tree/master/examples/pybullet/gym/pybullet_envs/minitaur/envs_v2) and this [ARS fork](https://github.com/erwincoumans/ars).
+
+'''
+pip install pybullet arspb ray puppersim
+ray start --head
+python3 puppersim/pupper_ars_train.py --policy_type=linear
+python3 puppersim/pupper_ars_run_policy.py ----expert_policy_file=data/lin_policy_plus_best.npz --json_file=data/params.json
+'''
+
+See a video of a trained policy: https://www.youtube.com/watch?v=JzNsax4M8eg
