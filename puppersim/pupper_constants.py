@@ -22,7 +22,7 @@ from __future__ import print_function
 
 import collections
 import gin
-
+import numpy as np
 import puppersim.data as pd
 URDF_PATH = pd.getDataPath()+"/pupper_v2a.urdf" #or pupper_v2b with toes, but no visual meshes
 
@@ -122,6 +122,9 @@ HIP_POSITIONS = collections.OrderedDict((
     (LEG_NAMES[3], (-0.21, 0.1157, 0)),
 ))
 
+MOTOR_ACTION_LOWER_LIMIT = np.array([-0.18,0.1,-2.3]*4)
+MOTOR_ACTION_UPPER_LIMIT = np.array([0.18,0.7,-0.6]*4)
+  
 # Add the gin constants to be used for gin binding in config. Append "PUPPER_"
 # for unique binding names.
 gin.constant("pupper_constants.PUPPER_NUM_MOTORS", NUM_MOTORS)
@@ -134,3 +137,6 @@ gin.constant("pupper_constants.PUPPER_JOINT_OFFSETS", JOINT_OFFSETS)
 gin.constant("pupper_constants.PUPPER_MOTOR_NAMES", MOTOR_NAMES)
 gin.constant("pupper_constants.PUPPER_END_EFFECTOR_NAMES", END_EFFECTOR_NAMES)
 gin.constant("pupper_constants.PUPPER_MOTOR_GROUP", MOTOR_GROUP)
+gin.constant("pupper_constants.MOTOR_ACTION_LOWER_LIMIT", MOTOR_ACTION_LOWER_LIMIT)
+gin.constant("pupper_constants.MOTOR_ACTION_UPPER_LIMIT", MOTOR_ACTION_UPPER_LIMIT)
+

@@ -3,7 +3,7 @@ Simulation for DJI Pupper v2 robot
 
 ## Usage:
 
-python3 setup.py develop
+python setup.py develop
 
 Then run puppersim/pupper_server.py
 
@@ -27,8 +27,8 @@ You can train the pupper using pybullet [envs_v2](https://github.com/bulletphysi
 ```
 pip install pybullet arspb ray puppersim
 ray start --head
-python3 puppersim/pupper_ars_train.py --policy_type=linear
-python3 puppersim/pupper_ars_run_policy.py ----expert_policy_file=data/lin_policy_plus_best.npz --json_file=data/params.json
+python puppersim/pupper_ars_train.py --policy_type=linear
+python puppersim/pupper_ars_run_policy.py --expert_policy_file=data/lin_policy_plus_best_xxx.npz --json_file=data/params.json
 ```
 
 See a video of a trained policy: https://www.youtube.com/watch?v=JzNsax4M8eg

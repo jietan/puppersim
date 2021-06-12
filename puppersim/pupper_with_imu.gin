@@ -7,6 +7,7 @@ import pybullet_envs.minitaur.envs_v2.scenes.simple_scene
 import pybullet_envs.minitaur.envs_v2.sensors.imu_sensor
 import pybullet_envs.minitaur.envs_v2.sensors.motor_angle_sensor
 import pybullet_envs.minitaur.robots.hybrid_motor_model
+import puppersim.pupper_constants
 import puppersim.pupper_locomotion_task
 import puppersim.pupper_terminal_conditions
 
@@ -44,8 +45,8 @@ locomotion_gym_env.LocomotionGymEnv.gym_config = @locomotion_gym_config.Locomoti
 locomotion_gym_env.LocomotionGymEnv.scene = @simple_scene.SimpleScene()
 
 # Specify the motor limits, and motor control mode.
-robot_config.MotorLimits.angle_lower_limits = %LOWER_BOUND
-robot_config.MotorLimits.angle_upper_limits = %UPPER_BOUND
+robot_config.MotorLimits.angle_lower_limits = %pupper_constants.MOTOR_ACTION_LOWER_LIMIT
+robot_config.MotorLimits.angle_upper_limits = %pupper_constants.MOTOR_ACTION_UPPER_LIMIT
 laikago/robot_config.MotorLimits.torque_lower_limits = -4
 laikago/robot_config.MotorLimits.torque_upper_limits = 4
 
