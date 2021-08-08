@@ -36,9 +36,11 @@ setup(
     include_package_data=True,
     package_data={'data': ["upper_leg_left_rear.obj"]},
     install_requires=[
-        #"pybullet",
+        "pybullet",
         "gym",
         "numpy",
+        "absl",
+        "gin-config",
     ],
     classifiers=[
         "Development Status :: 4 - Beta",
