@@ -32,7 +32,7 @@ def create_pupper_env():
   CONFIG_DIR = puppersim.getPupperSimPath()+"/"
   _CONFIG_FILE = os.path.join(CONFIG_DIR, "pupper_with_imu.gin")
   _NUM_STEPS = 10000
-  _ENV_RANDOM_SEED = 13
+  _ENV_RANDOM_SEED = 2 
    
   gin.bind_parameter("scene_base.SceneBase.data_root", pd.getDataPath()+"/")
   gin.parse_config_file(_CONFIG_FILE)
@@ -53,7 +53,7 @@ class Worker(object):
                  policy_params = None,
                  deltas=None,
                  rollout_length=1000,
-                 delta_std=0.02):
+                 delta_std=0.01):
 
         # initialize OpenAI environment for each worker
         try:
@@ -186,7 +186,7 @@ class ARSLearner(object):
                  num_workers=32, 
                  num_deltas=320, 
                  deltas_used=320,
-                 delta_std=0.02, 
+                 delta_std=0.01, 
                  logdir=None, 
                  rollout_length=4000,
                  step_size=0.01,
@@ -481,16 +481,16 @@ if __name__ == '__main__':
     parser.add_argument('--n_iter', '-n', type=int, default=100000)
     parser.add_argument('--n_directions', '-nd', type=int, default=8)
     parser.add_argument('--deltas_used', '-du', type=int, default=8)
-    parser.add_argument('--step_size', '-s', type=float, default=0.02)
+    parser.add_argument('--step_size', '-s', type=float, default=0.04)
     parser.add_argument('--delta_std', '-std', type=float, default=.03)
     parser.add_argument('--n_workers', '-e', type=int, default=18)
-    parser.add_argument('--rollout_length', '-r', type=int, default=4000)
+    parser.add_argument('--rollout_length', '-r', type=int, default=2000)
 
     # for Swimmer-v1 and HalfCheetah-v1 use shift = 0
     # for Hopper-v1, Walker2d-v1, and Ant-v1 use shift = 1
     # for Humanoid-v1 used shift = 5
     parser.add_argument('--shift', type=float, default=0)
-    parser.add_argument('--seed', type=int, default=237)
+    parser.add_argument('--seed', type=int, default=37)
     parser.add_argument('--policy_type', type=str, help="Policy type, linear or nn (neural network)", default= 'linear')
     parser.add_argument('--dir_path', type=str, default='data')
 
