@@ -2,8 +2,8 @@
 
 Code to load a policy and generate rollout data. Adapted from https://github.com/berkeleydeeprlcourse. 
 Example usage:
-    python run_policy.py ../trained_policies/Humanoid-v1/policy_reward_11600/lin_policy_plus.npz Humanoid-v1 --render \
-            --num_rollouts 20
+python3 pupper_ars_run_policy.py --expert_policy_file=data/lin_policy_plus_best_10.npz --json_file=data/params.json
+
 """
 import numpy as np
 import gym
@@ -27,12 +27,12 @@ import gin
 from pybullet_envs.minitaur.envs_v2 import env_loader
 import puppersim.data as pd
 
-def create_pupper_env():
+def create_pupper_env(run_on_robot=False):
   CONFIG_DIR = puppersim.getPupperSimPath()+"/"
-  _CONFIG_FILE = os.path.join(CONFIG_DIR, "pupper_with_imu.gin")
-  _NUM_STEPS = 10000
-  _ENV_RANDOM_SEED = 13
-   
+  if run_on_robot:
+    _CONFIG_FILE = os.path.join(CONFIG_DIR, "pupper_pmtg_robot.gin")
+  else:
+    _CONFIG_FILE = os.path.join(CONFIG_DIR, "pupper_pmtg.gin")
   gin.bind_parameter("scene_base.SceneBase.data_root", pd.getDataPath()+"/")
   gin.parse_config_file(_CONFIG_FILE)
   gin.bind_parameter("SimulationParameters.enable_rendering", True)
@@ -52,6 +52,7 @@ def main(argv):
     parser.add_argument('--num_rollouts', type=int, default=20,
                         help='Number of expert rollouts')
     parser.add_argument('--json_file', type=str, default="")
+    parser.add_argument('--run_on_robot', action='store_true')
     if len(argv):
       args = parser.parse_args(argv)
     else:
@@ -70,7 +71,7 @@ def main(argv):
     data = np.load(args.expert_policy_file, allow_pickle=True)
 
     print('create gym environment:', params["env_name"])
-    env = create_pupper_env()#gym.make(params["env_name"])
+    env = create_pupper_env(args.run_on_robot)#gym.make(params["env_name"])
 
 
     lst = data.files

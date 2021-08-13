@@ -30,9 +30,9 @@ import puppersim.data as pd
 
 def create_pupper_env():
   CONFIG_DIR = puppersim.getPupperSimPath()+"/"
-  _CONFIG_FILE = os.path.join(CONFIG_DIR, "pupper_with_imu.gin")
-  _NUM_STEPS = 10000
-  _ENV_RANDOM_SEED = 2 
+  _CONFIG_FILE = os.path.join(CONFIG_DIR, "pupper_pmtg.gin")
+#  _NUM_STEPS = 10000
+#  _ENV_RANDOM_SEED = 2 
    
   gin.bind_parameter("scene_base.SceneBase.data_root", pd.getDataPath()+"/")
   gin.parse_config_file(_CONFIG_FILE)

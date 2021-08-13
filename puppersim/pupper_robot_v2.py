@@ -249,3 +249,37 @@ class PupperRobot(quadruped_base.QuadrupedBase):
   def constants(cls):
     del cls
     return pupper_constants
+
+  def convert_leg_pose_to_motor_angles(leg_poses):
+    """Convert swing-extend coordinate space to motor angles for a robot type.
+
+    Args:
+      leg_poses: A list of leg poses in [abduction, swing, extend] space for all
+        4 legs. The order is [abd_0, swing_0, extend_0, abd_1, swing_1,
+        extend_1, ...]. Zero swing and zero extend gives a neutral standing
+        pose. The conversion is approximate where swing is reflected to hip and
+        extend is reflected to both knee and the hip.
+
+    Returns:
+      List of 12 motor positions.
+    """
+    swing_scale = -1.0
+    extension_scale = 1.0
+    # In this approximate conversion we set hip angle swing + half of the
+    # extent and knee angle to extend as rotation.
+    # We also scale swing and extend based on some hand-tuned constants.
+    multipliers = np.array([1.0, swing_scale, extension_scale] * 4)
+    swing_extend_scaled = leg_poses * multipliers
+    # Swing is (swing - half of the extension) due to the geometry of the leg.
+    extra_swing = swing_extend_scaled * ([0, 0, -0.5] * 4)
+    swing_extend_scaled += np.roll(extra_swing, -1)
+    motor_angles = list(swing_extend_scaled)
+    motor_angles = np.array(PupperRobot.get_neutral_motor_angles()) + motor_angles
+    return motor_angles
+
+  def get_neutral_motor_angles():
+    ABDUCTION_ANGLE=0
+    HIP_ANGLE=0.6
+    KNEE_ANGLE=-1.2
+    initial_joint_poses = [ABDUCTION_ANGLE,HIP_ANGLE,KNEE_ANGLE]*4
+    return initial_joint_poses
