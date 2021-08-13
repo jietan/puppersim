@@ -39,7 +39,7 @@ setup(
         "pybullet",
         "gym",
         "numpy",
-        "absl",
+        "absl-py",
         "gin-config",
     ],
     classifiers=[
