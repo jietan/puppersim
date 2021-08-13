@@ -72,7 +72,6 @@ def run_example(num_max_steps=_NUM_STEPS):
 #    joint_angles[2,:] = 0.4 * math.sin(2 * delta_time)
     action = joint_angles.flatten('F')
     action = np.append(action, [4, 0.5, 0.0, 2])
-    print(action)
     #action = [0, 0.6,-1.2,0, 0.6,-1.2,0, 0.6,-1.2,0, 0.6,-1.2]
     obs, reward, done, _ = env.step(action)
 

@@ -27,9 +27,9 @@ import gin
 from pybullet_envs.minitaur.envs_v2 import env_loader
 import puppersim.data as pd
 
-def create_pupper_env(run_on_robot=False):
+def create_pupper_env(args):
   CONFIG_DIR = puppersim.getPupperSimPath()+"/"
-  if run_on_robot:
+  if args.run_on_robot:
     _CONFIG_FILE = os.path.join(CONFIG_DIR, "pupper_pmtg_robot.gin")
   else:
     _CONFIG_FILE = os.path.join(CONFIG_DIR, "pupper_pmtg.gin")
@@ -45,8 +45,6 @@ def main(argv):
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--expert_policy_file', type=str, default="")
-    
-    parser.add_argument('--render', action='store_true')
     parser.add_argument('--nosleep', action='store_true')
 
     parser.add_argument('--num_rollouts', type=int, default=20,
@@ -71,7 +69,7 @@ def main(argv):
     data = np.load(args.expert_policy_file, allow_pickle=True)
 
     print('create gym environment:', params["env_name"])
-    env = create_pupper_env(args.run_on_robot)#gym.make(params["env_name"])
+    env = create_pupper_env(args)#gym.make(params["env_name"])
 
 
     lst = data.files
@@ -109,8 +107,6 @@ def main(argv):
       policy = LinearPolicy2(policy_params, update_filter=False)
     policy.get_weights()
    
-    if args.render: 
-      env.render('human')
     returns = []
     observations = []
     actions = []
@@ -130,10 +126,6 @@ def main(argv):
             totalr += r
             steps += 1
             
-            if args.render:
-                env.render()
-                if not args.nosleep:
-                  time.sleep(1./60.)
             #if steps % 100 == 0: print("%i/%i"%(steps, env.spec.timestep_limit))
             #if steps >= env.spec.timestep_limit:
             #    break
