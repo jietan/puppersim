@@ -1,0 +1,59 @@
+import pybullet_envs.minitaur.envs_v2.env_wrappers.observation_dictionary_to_array_wrapper
+import pybullet_envs.minitaur.envs_v2.locomotion_gym_config
+import pybullet_envs.minitaur.envs_v2.locomotion_gym_env
+import pybullet_envs.minitaur.envs_v2.scenes.scene_base
+import pybullet_envs.minitaur.envs_v2.scenes.simple_scene
+import pybullet_envs.minitaur.envs_v2.sensors.imu_sensor
+import pybullet_envs.minitaur.envs_v2.sensors.motor_angle_sensor
+import pybullet_envs.minitaur.robots.hybrid_motor_model
+import puppersim.pupper_constants
+import puppersim.pupper_locomotion_task
+import puppersim.pupper_terminal_conditions
+
+import puppersim.pupper_robot_v2
+import pybullet_envs.minitaur.robots.robot_config
+
+
+UPPER_BOUND = 6.28318548203
+LOWER_BOUND = -6.28318548203
+SIM_TIME_STEP = 0.001
+NUM_ACTION_REPEAT = 2
+
+# We use the default confirugration for MotorAngleSensor, which reads limits from the robot.
+SENSORS = [@motor_angle_sensor.MotorAngleSensor()]
+locomotion_gym_config.SimulationParameters.sim_time_step_s = %SIM_TIME_STEP
+locomotion_gym_config.SimulationParameters.num_action_repeat = %NUM_ACTION_REPEAT
+locomotion_gym_config.SimulationParameters.enable_rendering = False
+locomotion_gym_config.LocomotionGymConfig.simulation_parameters = @locomotion_gym_config.SimulationParameters()
+locomotion_gym_env.LocomotionGymEnv.gym_config = @locomotion_gym_config.LocomotionGymConfig()
+
+# Specify the scene.
+
+locomotion_gym_env.LocomotionGymEnv.scene = @simple_scene.SimpleScene()
+
+# Specify the motor limits, and motor control mode.
+robot_config.MotorLimits.angle_lower_limits = %pupper_constants.MOTOR_ACTION_LOWER_LIMIT
+robot_config.MotorLimits.angle_upper_limits = %pupper_constants.MOTOR_ACTION_UPPER_LIMIT
+robot_config.MotorLimits.torque_lower_limits = -4
+robot_config.MotorLimits.torque_upper_limits = 4
+
+pupper_robot_v2.PupperRobot.motor_limits = @robot_config.MotorLimits()
+pupper_robot_v2.PupperRobot.motor_control_mode = %robot_config.MotorControlMode.POSITION
+pupper_robot_v2.PupperRobot.motor_model_class = @hybrid_motor_model.HybridMotorModel
+pupper_robot_v2.PupperRobot.sensors = %SENSORS
+locomotion_gym_env.LocomotionGymEnv.robot_class = @pupper_robot_v2.PupperRobot
+
+# Specify the task.
+locomotion_gym_env.LocomotionGymEnv.task = @pupper_locomotion_task.SimpleForwardTask()
+pupper_locomotion_task.SimpleForwardTask.terminal_condition = @pupper_terminal_conditions.default_terminal_condition_for_pupper
+
+# Specify the motor model parameters. Notice that we don't need to specify the control mode or motor limits here.
+hybrid_motor_model.HybridMotorModel.kp = 16
+hybrid_motor_model.HybridMotorModel.kd = .1
+hybrid_motor_model.HybridMotorModel.strength_ratios = 1
+hybrid_motor_model.HybridMotorModel.torque_lower_limits = 0
+hybrid_motor_model.HybridMotorModel.torque_upper_limits = 0
+
+env_loader.load.wrapper_classes = [
+    @observation_dictionary_to_array_wrapper.ObservationDictionaryToArrayWrapper]
+    

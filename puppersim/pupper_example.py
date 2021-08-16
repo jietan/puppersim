@@ -22,6 +22,9 @@ from absl import flags
 import os
 import time
 import gin
+import math
+import numpy as np
+
 from pybullet_envs.minitaur.agents.baseline_controller import static_gait_controller
 from pybullet_envs.minitaur.envs_v2 import env_loader
 import pybullet as p
@@ -31,16 +34,21 @@ import os
 
 
 flags.DEFINE_bool("render", True, "Whether to render the example.")
+flags.DEFINE_bool("run_on_robot", False, "Whether to run on robot or in simulation.")
 
 FLAGS = flags.FLAGS
 CONFIG_DIR = puppersim.getPupperSimPath()+"/"
-_CONFIG_FILE = os.path.join(CONFIG_DIR, "pupper_with_imu.gin")
 _NUM_STEPS = 10000
 _ENV_RANDOM_SEED = 13
 
 
 def _load_config(render=False):
-  gin.parse_config_file(_CONFIG_FILE)
+  if FLAGS.run_on_robot:
+    config_file = os.path.join(CONFIG_DIR, "pupper_pmtg_robot.gin")
+  else:
+    config_file = os.path.join(CONFIG_DIR, "pupper_pmtg.gin")
+
+  gin.parse_config_file(config_file)
   gin.bind_parameter("SimulationParameters.enable_rendering", render)
 
 
@@ -55,14 +63,22 @@ def run_example(num_max_steps=_NUM_STEPS):
   print("env.action_space=",env.action_space)
   observation = env.reset()
   policy = static_gait_controller.StaticGaitController(env.robot)
-    
+
   for _ in range(num_max_steps):
     #action = policy.act(observation)
-    action = [0, 0.6,-1.2,0, 0.6,-1.2,0, 0.6,-1.2,0, 0.6,-1.2]
+    joint_angles = np.zeros((3, 4))
+    delta_time = env.robot.GetTimeSinceReset()
+#    joint_angles[1,:] = 0.2 * math.sin(2 * delta_time)
+#    joint_angles[2,:] = 0.4 * math.sin(2 * delta_time)
+    action = joint_angles.flatten('F')
+    action = np.append(action, [4, 0.5, 0.0, 2])
+    #action = [0, 0.6,-1.2,0, 0.6,-1.2,0, 0.6,-1.2,0, 0.6,-1.2]
     obs, reward, done, _ = env.step(action)
-    time.sleep(0.01)
-    if done:
-      break
+
+#    print("obs: ", observation)
+#    print("act: ", action)
+#    if done:
+#      break
 
 
 def main(_):

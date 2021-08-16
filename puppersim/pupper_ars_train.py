@@ -30,9 +30,9 @@ import puppersim.data as pd
 
 def create_pupper_env():
   CONFIG_DIR = puppersim.getPupperSimPath()+"/"
-  _CONFIG_FILE = os.path.join(CONFIG_DIR, "pupper_with_imu.gin")
-  _NUM_STEPS = 10000
-  _ENV_RANDOM_SEED = 2 
+  _CONFIG_FILE = os.path.join(CONFIG_DIR, "pupper_pmtg.gin")
+#  _NUM_STEPS = 10000
+#  _ENV_RANDOM_SEED = 2 
    
   gin.bind_parameter("scene_base.SceneBase.data_root", pd.getDataPath()+"/")
   gin.parse_config_file(_CONFIG_FILE)
@@ -478,10 +478,10 @@ if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--env_name', type=str, default='InvertedPendulumSwingupBulletEnv-v0')
-    parser.add_argument('--n_iter', '-n', type=int, default=100000)
-    parser.add_argument('--n_directions', '-nd', type=int, default=8)
-    parser.add_argument('--deltas_used', '-du', type=int, default=8)
-    parser.add_argument('--step_size', '-s', type=float, default=0.04)
+    parser.add_argument('--n_iter', '-n', type=int, default=1000)
+    parser.add_argument('--n_directions', '-nd', type=int, default=16)
+    parser.add_argument('--deltas_used', '-du', type=int, default=16)
+    parser.add_argument('--step_size', '-s', type=float, default=0.03)
     parser.add_argument('--delta_std', '-std', type=float, default=.03)
     parser.add_argument('--n_workers', '-e', type=int, default=18)
     parser.add_argument('--rollout_length', '-r', type=int, default=2000)
