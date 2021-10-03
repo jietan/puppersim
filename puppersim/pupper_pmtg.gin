@@ -18,7 +18,7 @@ import pybullet_envs.minitaur.robots.robot_config
 UPPER_BOUND = 6.28318548203
 LOWER_BOUND = -6.28318548203
 SIM_TIME_STEP = 0.001
-NUM_ACTION_REPEAT = 2
+NUM_ACTION_REPEAT = 28
 
 
 # We use the default confirugration for MotorAngleSensor, which reads limits from the robot.
