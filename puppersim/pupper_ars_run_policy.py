@@ -119,6 +119,7 @@ def main(argv):
         steps = 0
         while not done:
             action = policy.act(obs)
+            #action[0:12] = 0
             observations.append(obs)
             actions.append(action)
             
@@ -127,7 +128,10 @@ def main(argv):
             totalr += r
             steps += 1
             
-            #if steps % 100 == 0: print("%i/%i"%(steps, env.spec.timestep_limit))
+            if steps % 10 == 0: 
+            	print("Avg time step: ", env.get_time_since_reset() / steps)
+            #	print("sim time {}, actual time: {}".format(env.get_time_since_reset(), time.time() - start_time))
+            
             #if steps >= env.spec.timestep_limit:
             #    break
         #print("steps=",steps)
