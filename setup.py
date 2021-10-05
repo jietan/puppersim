@@ -41,6 +41,8 @@ setup(
         "numpy",
         "absl-py",
         "gin-config",
+        "scipy",
+        "tensorflow",
     ],
     classifiers=[
         "Development Status :: 4 - Beta",

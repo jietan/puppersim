@@ -35,7 +35,7 @@ def create_pupper_env(args):
     _CONFIG_FILE = os.path.join(CONFIG_DIR, "pupper_pmtg.gin")
   gin.bind_parameter("scene_base.SceneBase.data_root", pd.getDataPath()+"/")
   gin.parse_config_file(_CONFIG_FILE)
-  gin.bind_parameter("SimulationParameters.enable_rendering", True)
+  gin.bind_parameter("SimulationParameters.enable_rendering", args.render)
   env = env_loader.load()
   
   return env
@@ -51,6 +51,7 @@ def main(argv):
                         help='Number of expert rollouts')
     parser.add_argument('--json_file', type=str, default="")
     parser.add_argument('--run_on_robot', action='store_true')
+    parser.add_argument('--render', action='store_true')
     if len(argv):
       args = parser.parse_args(argv)
     else:
@@ -118,6 +119,7 @@ def main(argv):
         steps = 0
         while not done:
             action = policy.act(obs)
+            #action[0:12] = 0
             observations.append(obs)
             actions.append(action)
             
@@ -126,7 +128,10 @@ def main(argv):
             totalr += r
             steps += 1
             
-            #if steps % 100 == 0: print("%i/%i"%(steps, env.spec.timestep_limit))
+            if steps % 10 == 0: 
+            	print("Avg time step: ", env.get_time_since_reset() / steps)
+            #	print("sim time {}, actual time: {}".format(env.get_time_since_reset(), time.time() - start_time))
+            
             #if steps >= env.spec.timestep_limit:
             #    break
         #print("steps=",steps)

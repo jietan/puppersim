@@ -1,3 +1,4 @@
+import math
 import gin
 import time
 import numpy as np
@@ -34,8 +35,9 @@ class PupperRobot(quadruped_base.QuadrupedBase):
     serial_port = next(list_ports.grep(".*ttyACM0.*")).device
     self._hardware_interface = interface.Interface(serial_port)
     time.sleep(0.25)
-    self._hardware_interface.set_joint_space_parameters(kp=20.0, kd=1.0, max_current=7.0)
+    self._hardware_interface.set_joint_space_parameters(kp=50.0, kd=5.0, max_current=7.0)
     super().__init__(**kwargs)
+    self._clock = time.time
 
 
   def _pre_load(self):
@@ -88,8 +90,10 @@ class PupperRobot(quadruped_base.QuadrupedBase):
     # self._get_state() will receive a new state proto from Pupper. We also
     # call the self.receive_observation() to update the internal varialbes.
     self._get_state()
-    self.receive_observation()
+    # self.receive_observation()
 
+
+    joint_angles = [0, 0.6, -1.2] * 4
     super().reset(base_position, base_orientation_quaternion, joint_angles)
 
     # Receive another state at the end of the reset sequence. Though it is
@@ -97,7 +101,7 @@ class PupperRobot(quadruped_base.QuadrupedBase):
     self._get_state()
     self._step_counter = 0
     self._reset_time = self._clock()
-
+ 
   def _reset_joint_angles(self,
                           joint_angles: Optional[Union[Tuple[float],
                                                        Dict[Text,
@@ -108,7 +112,50 @@ class PupperRobot(quadruped_base.QuadrupedBase):
       joint_angles: The joint pose if provided. Will use the robot default pose
         from configuration.
     """
-    pass
+
+    self.set_pose(joint_angles, duration=3.0)
+
+    # Also resets the pose in the animation.
+    joint_angles_dict = dict(
+        zip(self._motor_id_dict.keys(), joint_angles))
+    super()._reset_joint_angles(joint_angles_dict)
+
+    print("exit reset joint angles")
+
+  def set_pose(self, desired_motor_angles, duration):
+    """Set the pose of the legs within the given duration."""
+    if duration <= 1:
+      raise ValueError(
+          'The set pose duration of {}s is too short and unsafe.'.format(
+              duration))
+
+    assert len(desired_motor_angles) == self.num_motors
+    print("enter set pose")
+
+    # Get an initial state.
+    self._get_state()
+    initial_motor_angles = self.motor_angles
+
+    sequence_start_time = self._clock()
+    time_since_start = 0
+    while time_since_start < duration:
+      progress = time_since_start / duration
+      # Use cos to create a soft acceleration/deceleration profile.
+      progress = 0.5 * (1 - math.cos(progress * math.pi))
+      assert 0 <= progress <= 1
+      target_motor_angles = []
+      for motor_id, desired_motor_angle in enumerate(
+          desired_motor_angles, start=0):
+        target_motor_angles.append((1 - progress) *
+                                   initial_motor_angles[motor_id] +
+                                   progress * desired_motor_angle)
+
+      self.apply_action(target_motor_angles,
+                        robot_config.MotorControlMode.POSITION)
+
+      # TODO(tingnan): This sleep is probably not needed?
+      time.sleep(0.002)
+      time_since_start = self._clock() - sequence_start_time
 
   def _get_state(self):
     self._hardware_interface.read_incoming_data()
@@ -145,8 +192,9 @@ class PupperRobot(quadruped_base.QuadrupedBase):
 #    super()._reset_base_pose(self.base_position,
 #                             self.base_orientation_quaternion)
 
-    joint_angles_dict = dict(zip(self._motor_id_dict.keys(), self.motor_angles))
-    super()._reset_joint_angles(joint_angles_dict)
+    #joint_angles_dict = dict(zip(self._motor_id_dict.keys(), self.motor_angles))
+    #super()._reset_joint_angles(joint_angles_dict)
+    self._get_state()
 
   @property
   def base_position(self):

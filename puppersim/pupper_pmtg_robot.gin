@@ -10,6 +10,7 @@ import pybullet_envs.minitaur.robots.hybrid_motor_model
 import puppersim.pupper_constants
 import puppersim.pupper_locomotion_task
 import puppersim.pupper_terminal_conditions
+import time
 
 import puppersim.pupper_robot_v2
 import pybullet_envs.minitaur.robots.robot_config
@@ -18,7 +19,7 @@ import pybullet_envs.minitaur.robots.robot_config
 UPPER_BOUND = 6.28318548203
 LOWER_BOUND = -6.28318548203
 SIM_TIME_STEP = 0.001
-NUM_ACTION_REPEAT = 2
+NUM_ACTION_REPEAT = 1
 
 # We use the default confirugration for MotorAngleSensor, which reads limits from the robot.
 SENSORS = [@motor_angle_sensor.MotorAngleSensor()]
@@ -27,6 +28,7 @@ locomotion_gym_config.SimulationParameters.num_action_repeat = %NUM_ACTION_REPEA
 locomotion_gym_config.SimulationParameters.enable_rendering = False
 locomotion_gym_config.LocomotionGymConfig.simulation_parameters = @locomotion_gym_config.SimulationParameters()
 locomotion_gym_env.LocomotionGymEnv.gym_config = @locomotion_gym_config.LocomotionGymConfig()
+locomotion_gym_env.LocomotionGymEnv.clock = @time.time
 
 # Specify the scene.
 
@@ -59,11 +61,11 @@ pmtg_wrapper_env.PmtgWrapperEnv.action_filter_enable = True
 pmtg_wrapper_env.PmtgWrapperEnv.intensity_upper_bound = 1.0
 pmtg_wrapper_env.PmtgWrapperEnv.max_delta_time = 4.0
 pmtg_wrapper_env.PmtgWrapperEnv.min_delta_time = 2.0
-pmtg_wrapper_env.PmtgWrapperEnv.residual_range = 0.35
+pmtg_wrapper_env.PmtgWrapperEnv.residual_range = 0.1
 pmtg_wrapper_env.PmtgWrapperEnv.integrator_coupling_mode = "all coupled"
 pmtg_wrapper_env.PmtgWrapperEnv.walk_height_coupling_mode = "all coupled"
 pmtg_wrapper_env.PmtgWrapperEnv.variable_swing_stance_ratio = 1
-pmtg_wrapper_env.PmtgWrapperEnv.init_gait = "walk"
+pmtg_wrapper_env.PmtgWrapperEnv.init_gait = "pace"
 
 env_loader.load.wrapper_classes = [
     @pmtg_wrapper_env.PmtgWrapperEnv,
