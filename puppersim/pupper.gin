@@ -6,7 +6,7 @@ import pybullet_envs.minitaur.envs_v2.scenes.scene_base
 import pybullet_envs.minitaur.envs_v2.scenes.simple_scene
 import pybullet_envs.minitaur.envs_v2.sensors.imu_sensor
 import pybullet_envs.minitaur.envs_v2.sensors.motor_angle_sensor
-import pybullet_envs.minitaur.robots.hybrid_motor_model
+import puppersim.pupper_motor_model
 import puppersim.pupper_constants
 import puppersim.pupper_locomotion_task
 import puppersim.pupper_terminal_conditions
@@ -41,7 +41,7 @@ robot_config.MotorLimits.torque_upper_limits = 0 # BUG: has no effect
 
 pupper_v2.Pupper.motor_limits = @robot_config.MotorLimits()
 pupper_v2.Pupper.motor_control_mode = %robot_config.MotorControlMode.POSITION
-pupper_v2.Pupper.motor_model_class = @hybrid_motor_model.HybridMotorModel
+pupper_v2.Pupper.motor_model_class = @pupper_motor_model.PupperMotorModel
 locomotion_gym_env.LocomotionGymEnv.robot_class = @pupper_v2.Pupper
 
 # Specify the task.
