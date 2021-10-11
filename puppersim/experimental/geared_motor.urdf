@@ -1,0 +1,63 @@
+
+<?xml version="1.0" ?>
+<robot name="husky_robot" xmlns:xacro="http://ros.org/wiki/xacro">
+  <material name="White">
+    <color rgba="1.0 1.0 1.0 1.0"/>
+  </material>
+  <link name="stator">
+    <inertial>
+      <mass value="5."/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.02467" ixy="0" ixz="0" iyy="0.02467" iyz="0" izz="0.04411"/>
+    </inertial>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.03" radius="0.02"/>
+      </geometry>
+    </collision>
+  </link>
+  
+	<link name="shaft">
+    <inertial>
+      <mass value="0.5"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.02467" ixy="0" ixz="0" iyy="0.02467" iyz="0" izz="0.04411"/>
+    </inertial>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.01" radius="0.005"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="shaft_stator" type="continuous">
+    <parent link="stator"/>
+    <child link="shaft"/>
+    <origin rpy="0 0 0" xyz="0 0 -0.02"/>
+    <axis rpy="0 0 0" xyz="0 0 1"/>
+  </joint>
+  
+  
+  
+	<link name="rotor">
+    <inertial>
+      <mass value="2.637"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.02467" ixy="0" ixz="0" iyy="0.02467" iyz="0" izz="0.04411"/>
+    </inertial>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.01" radius="0.01"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="rotor_shaft" type="continuous">
+    <parent link="stator"/>
+    <child link="rotor"/>
+    <origin rpy="0 0 0" xyz="0 0 0.04"/>
+    <axis rpy="0 0 0" xyz="0 0 1"/>
+  </joint>
+  
+</robot>
