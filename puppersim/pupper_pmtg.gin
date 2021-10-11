@@ -65,7 +65,7 @@ pmtg_wrapper_env.PmtgWrapperEnv.residual_range = 0.1
 pmtg_wrapper_env.PmtgWrapperEnv.integrator_coupling_mode = "all coupled"
 pmtg_wrapper_env.PmtgWrapperEnv.walk_height_coupling_mode = "all coupled"
 pmtg_wrapper_env.PmtgWrapperEnv.variable_swing_stance_ratio = 1
-pmtg_wrapper_env.PmtgWrapperEnv.init_gait = "pace"
+pmtg_wrapper_env.PmtgWrapperEnv.init_gait = "walk"
 
 env_loader.load.wrapper_classes = [
     @pmtg_wrapper_env.PmtgWrapperEnv,
