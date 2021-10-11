@@ -60,8 +60,8 @@ locomotion_gym_env.LocomotionGymEnv.task = @pupper_locomotion_task.SimpleForward
 pupper_locomotion_task.SimpleForwardTask.terminal_condition = @pupper_terminal_conditions.default_terminal_condition_for_pupper
 
 # Specify the motor model parameters. Notice that we don't need to specify the control mode or motor limits here.
-pupper_motor_model.PupperMotorModel.kp = 50.0
-pupper_motor_model.PupperMotorModel.kd = 5.0
+pupper_motor_model.PupperMotorModel.kp = 16
+pupper_motor_model.PupperMotorModel.kd = .1
 pupper_motor_model.PupperMotorModel.strength_ratios = 1
 pupper_motor_model.PupperMotorModel.torque_lower_limits = -2.3333333333333335
 pupper_motor_model.PupperMotorModel.torque_upper_limits = 2.3333333333333335
