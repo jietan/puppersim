@@ -35,6 +35,46 @@ def _convert_to_np_array(inputs: Union[float, Tuple[float], np.ndarray], dim):
   return outputs
 
 
+class FirstOrderFilter:
+  """
+  First order complementary filter.
+
+  Gain is unity until time_constant at which point it is -20dB/dec.
+  """
+  def __init__(self, time_constant: float, sampling_time: float):
+    """Initializes the first order filter.
+
+    Requires that filter is called at regular intervals specified by sampling_time
+
+    Computes the complementary factor as, 
+    alpha = sampling_time / (time_constant + sampling_time),
+    which is valid for time_constant >> sampling_time.
+    
+    Args:
+      time_constant: time constant [s]
+      sampling_time: sampling time [s]
+    """
+    self.alpha = sampling_time / (time_constant + sampling_time)
+    self.state = None
+
+  def __call__(self, input: Union[np.ndarray, float]):
+    """
+    Updates the filter and returns the new filtered value.
+    
+    Accepts floats and np.arrays but you cannot switch between them at runtime.
+    
+    Args:
+      input: input
+    
+    Returns:
+      Filtered output
+    """
+    if self.state:
+      self.state = self.alpha * input + (1 - self.alpha) * self.state
+    else:
+      self.state = input
+    return self.state 
+
 @gin.configurable
 class PupperMotorModel(object):
   """A simple motor model that supports proportional and derivative control.
@@ -52,18 +92,25 @@ class PupperMotorModel(object):
   def __init__(
       self,
       num_motors: int,
+      sampling_time: float,
       pd_latency: float = 0,
       motor_control_mode=robot_config.MotorControlMode.POSITION,
       kp: Union[float, Tuple[float], np.ndarray] = 60,
       kd: Union[float, Tuple[float], np.ndarray] = 1,
       strength_ratios: Union[float, Tuple[float], np.ndarray] = 1,
       torque_lower_limits: Union[float, Tuple[float], np.ndarray] = None,
-      torque_upper_limits: Union[float, Tuple[float], np.ndarray] = None
+      torque_upper_limits: Union[float, Tuple[float], np.ndarray] = None,
+      velocity_filter_time_constant: float = 0.03,
+      torque_time_constant: float = 0.03,
+      motor_damping: float = 0.0045,
+      motor_friction: float = 0.021,
+      motor_torque_dependent_friction: float = 0.28,    
   ):
     """Initializes the class.
 
     Args:
       num_motors: The number of motors for parallel computation.
+      sampling_time: Interval between model updates [s].
       pd_latency: Simulates the motor controller's latency in reading motor
         angles and velocities.
       motor_control_mode: Can be POSITION, TORQUE, or HYBRID. In POSITION
@@ -80,6 +127,12 @@ class PupperMotorModel(object):
       torque_lower_limits: The lower bounds for torque outputs.
       torque_upper_limits: The upper bounds for torque outputs. The output
         torques will be clipped by the lower and upper bounds.
+      velocity_filter_time_constant: Time constant for the velocity filter.
+      torque_time_constant: Time constant for the actuator's transfer 
+        function between requested torque and actual torque.
+      motor_damping: Damping in [Nm/(rad/s)] of the motor output.
+      motor_friction: Coulomb friction in [Nm] of the motor output.
+      motor_torque_dependent_friction: Coulomb friction per Nm of motor torque, unitless.
 
     Raises:
       ValueError: If the number of motors provided is negative or zero.
@@ -102,6 +155,21 @@ class PupperMotorModel(object):
       self._torque_upper_limits = _convert_to_np_array(torque_upper_limits,
                                                        self._num_motors)
     self._motor_control_mode = motor_control_mode
+
+    self._velocity_filter = FirstOrderFilter(time_constant=velocity_filter_time_constant, 
+                                             sampling_time=sampling_time)
+    self._torque_filter = FirstOrderFilter(time_constant=torque_time_constant,
+                                           sampling_time=sampling_time)
+
+    # Used for modeling continuous-time actuator dynamics
+    self._physical_velocity_filter = FirstOrderFilter(time_constant=2*sampling_time,
+                                                      sampling_time=sampling_time)
+
+    self._motor_damping = motor_damping
+    self._motor_friction = motor_friction
+    self._motor_torque_dependent_friction = motor_torque_dependent_friction
+
+    self._previous_true_motor_velocity = 0.0
 
     # The history buffer is used to simulate the pd latency effect.
     # TODO(b/157786642): remove hacks on duplicate timestep once the sim clock
@@ -154,9 +222,15 @@ class PupperMotorModel(object):
 
   def update(self, timestamp, true_motor_positions: np.ndarray,
              true_motor_velocities: np.ndarray):
+    # Filter the motor_velocities to mimick the C610's velocity filter dynamics
+    filtered_motor_velocities = self._velocity_filter(true_motor_velocities)
+
+    # Keep track of the last true motor velocity in order to model actuator dynamics
+    self._previous_true_motor_velocity = self._physical_velocity_filter(true_motor_velocities)
+
     # Push these to the buffer
     self._observation_buffer.add(timestamp,
-                                 (true_motor_positions, true_motor_velocities))
+                                 (true_motor_positions, filtered_motor_velocities))
 
   def get_motor_torques(
       self,
@@ -192,10 +266,20 @@ class PupperMotorModel(object):
           kp=self._kp,
           desired_motor_velocities=self._zero_array,
           kd=self._kd)
-
+      
     if motor_torques is None:
       raise ValueError(
           "{} is not a supported motor control mode".format(motor_control_mode))
+
+    # Apply the output filter to model actuator dynamics
+    motor_torques = self._torque_filter(motor_torques)
+
+    # Apply motor damping and friction
+    motor_torques -= (np.sign(self._previous_true_motor_velocity) *
+                      self._motor_torque_dependent_friction *
+                      motor_torques)
+    motor_torques -= np.sign(self._previous_true_motor_velocity) * self._motor_friction
+    motor_torques -= self._previous_true_motor_velocity * self._motor_damping
 
     # Rescale and clip the motor torques as needed.
     motor_torques = self._strength_ratios * motor_torques
