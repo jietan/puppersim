@@ -43,6 +43,16 @@ class Pupper(quadruped_base.QuadrupedBase):
         end_effector_names=pupper_constants.END_EFFECTOR_NAMES,
         user_group=pupper_constants.MOTOR_GROUP,
     )
+  def _on_load(self):
+    self._joint_id_dict = self._urdf_loader.get_joint_id_dict()
+    for joint_id in self._joint_id_dict.values():
+      # set a default friction force for all motors in PyBullet.
+      self._pybullet_client.setJointMotorControl2(
+          bodyIndex=self._urdf_loader.robot_id,
+          jointIndex=joint_id,
+          controlMode=self._pybullet_client.VELOCITY_CONTROL,
+          targetVelocity=0,
+          force=pupper_constants.JOINT_FRICTION_FORCE)
 
   def convert_leg_pose_to_motor_angles(leg_poses):
     """Convert swing-extend coordinate space to motor angles for a robot type.
