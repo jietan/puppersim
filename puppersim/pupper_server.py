@@ -29,7 +29,13 @@ cid = p.connect(p.GUI_SERVER)
 
 #disable rendering during creation.
 p.configureDebugVisualizer(p.COV_ENABLE_RENDERING, 0)
-p.configureDebugVisualizer(p.COV_ENABLE_KEYBOARD_SHORTCUTS,0)
+
+# disable keyboard shortcuts that allow you to toggle things like shadows (s) or wire-frame (w)
+p.configureDebugVisualizer(p.COV_ENABLE_KEYBOARD_SHORTCUTS,0) # s and w
+
+# disable shadows to potentially increase speed
+p.configureDebugVisualizer(p.COV_ENABLE_SHADOWS, 0)
+
 #white background
 #p.configureDebugVisualizer(rgbBackground=[1,1,1])
 p.setAdditionalSearchPath(pd.getDataPath())
@@ -63,52 +69,6 @@ if load_parkour:
 
 orn = p.getQuaternionFromEuler([0,0,-math.pi/2.])
 
-load_a1 = False
-if load_a1:
-  robot = p.loadURDF(pybullet_data.getDataPath()+"/a1/a1.urdf",[-0.3,0,0.5])#,orn)
-  #p.configureDebugVisualizer(p.COV_ENABLE_RENDERING,1)
-  #p.setGravity(0,0,-9.8)
-
-  A1_DEFAULT_ABDUCTION_ANGLE = 0
-  A1_DEFAULT_HIP_ANGLE = 0.9
-  A1_DEFAULT_KNEE_ANGLE = -1.8
-  NUM_LEGS = 4
-  INIT_MOTOR_ANGLES = np.array([
-      A1_DEFAULT_ABDUCTION_ANGLE,
-      A1_DEFAULT_HIP_ANGLE,
-      A1_DEFAULT_KNEE_ANGLE
-  ] * NUM_LEGS)
-
-  MOTOR_NAMES = [
-      "FR_hip_joint",
-      "FR_upper_joint",
-      "FR_lower_joint",
-      "FL_hip_joint",
-      "FL_upper_joint",
-      "FL_lower_joint",
-      "RR_hip_joint",
-      "RR_upper_joint",
-      "RR_lower_joint",
-      "RL_hip_joint",
-      "RL_upper_joint",
-      "RL_lower_joint",
-  ]
-  motor_ids = []
-
-  for j in range (p.getNumJoints(robot)):
-    joint_info = p.getJointInfo(robot,j)
-    name = joint_info[1].decode('utf-8')
-    print("joint_info[1]=",name)
-    if name in MOTOR_NAMES:
-      motor_ids.append(j)
-
-  for index in range (12):
-    joint_id = motor_ids[index]
-    p.setJointMotorControl2(robot, joint_id, p.POSITION_CONTROL, INIT_MOTOR_ANGLES[index])
-    p.resetJointState(robot, joint_id, INIT_MOTOR_ANGLES[index])
-    
-  
-
 #press 'G' or use the following line to hide the GUI
 p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
 
@@ -137,10 +97,8 @@ jointNames=[]
 for j in range (p.getNumJoints(robot)):
     p.changeDynamics(robot, j, linearDamping=0, angularDamping=0)
     info = p.getJointInfo(robot, j)
-    #print(info)
     jointName = info[1]
     jointNames.append(jointName)
-    #if jointName==jn:
     print("jointName=", jointName)
     jointType = info[2]
     if (jointType == p.JOINT_PRISMATIC or jointType == p.JOINT_REVOLUTE):
@@ -153,14 +111,10 @@ p.resetDebugVisualizerCamera(cameraDistance=1, cameraYaw=-134, cameraPitch=-30, 
 p.configureDebugVisualizer(p.COV_ENABLE_RENDERING, 1)
 
 
-
-
 for i in range(len(paramIds)):
       c = paramIds[i]
       targetPos = p.readUserDebugParameter(c)
-      #p.setJointMotorControl2(robot, jointIds[i], p.POSITION_CONTROL, targetPos, force=0)    
-      p.setJointMotorControl2(robot, jointIds[i], p.VELOCITY_CONTROL, targetPos, force=0.01)#friction
-      p.setJointMotorControl2(robot, jointIds[i], p.TORQUE_CONTROL, force=0)
+      p.setJointMotorControl2(robot, jointIds[i], p.VELOCITY_CONTROL, targetPos, force=0.02) # coulomb friction
       p.resetJointState(robot, jointIds[i], targetPos)
 
 
