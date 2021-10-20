@@ -64,7 +64,7 @@ def run_example(num_max_steps=_NUM_STEPS):
 
   env._pybullet_client.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
 
-  # motor limits overrides hybrid motor model torque limits here
+  # BUG: the motor limits defined by the robot override those of the motor model here
   # https://github.com/bulletphysics/bullet3/blob/48dc1c45da685c77d3642545c4851b05fb3a1e8b/examples/pybullet/gym/pybullet_envs/minitaur/robots/quadruped_base.py#L131
 
   env._robot._motor_model._torque_lower_limits = -np.array([MAX_TORQUE]*12)
@@ -77,9 +77,19 @@ def run_example(num_max_steps=_NUM_STEPS):
   for i in range(num_max_steps):
     joint_angles = np.zeros((3, 4))
     delta_time = env.robot.GetTimeSinceReset()
-    action = [0, 0.6,-1.2,0, 0.6,-1.2,0, 0.6,-1.2,0, 0.6,-1.2]
+    # 1Hz signal
+    phase = delta_time * 2 * np.pi 
+
+    # joint angles corresponding to a standing position
+    action = np.array([0, 0.6,-1.2,0, 0.6,-1.2,0, 0.6,-1.2,0, 0.6,-1.2])
+    # modulate the default joint angles by a sinusoid to make the robot do pushups
+    action = (np.sin(phase) * 0.6 + 0.8) * action
+
     obs, reward, done, _ = env.step(action)
-    time.sleep(0.001)
+
+    # you can increase/decrease the sleep time to make the simulator
+    # go slower/faster up to a certain point
+    time.sleep(0.0006)
     if i % 100 == 0:
       print("obs: ", obs)
       print("act: ", action)
