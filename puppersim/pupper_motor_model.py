@@ -272,7 +272,7 @@ class PupperMotorModel(object):
           "{} is not a supported motor control mode".format(motor_control_mode))
 
     # Apply the output filter to model actuator dynamics
-    motor_torques = self._torque_filter(motor_torques)
+    # motor_torques = self._torque_filter(motor_torques)
 
     # Apply motor damping and friction
     motor_torques -= (np.sign(self._previous_true_motor_velocity) *

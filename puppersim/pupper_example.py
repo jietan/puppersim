@@ -80,9 +80,10 @@ def run_example(num_max_steps=_NUM_STEPS):
     action = [0, 0.6,-1.2,0, 0.6,-1.2,0, 0.6,-1.2,0, 0.6,-1.2]
     obs, reward, done, _ = env.step(action)
     time.sleep(0.001)
-    if i % 10 == 0:
+    if i % 100 == 0:
       print("obs: ", obs)
       print("act: ", action)
+      print("time: ", delta_time)
 
 
 def main(_):
