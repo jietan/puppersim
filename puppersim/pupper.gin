@@ -49,14 +49,11 @@ locomotion_gym_env.LocomotionGymEnv.task = @pupper_locomotion_task.SimpleForward
 pupper_locomotion_task.SimpleForwardTask.terminal_condition = @pupper_terminal_conditions.default_terminal_condition_for_pupper
 
 # Specify the motor model parameters. Notice that we don't need to specify the control mode or motor limits here.
-hybrid_motor_model.HybridMotorModel.kp = 4
-hybrid_motor_model.HybridMotorModel.kd = 0.1
-hybrid_motor_model.HybridMotorModel.strength_ratios = 1
-hybrid_motor_model.HybridMotorModel.torque_lower_limits = 0 # BUG: has no effect
-hybrid_motor_model.HybridMotorModel.torque_upper_limits = 0 # BUG: has no effect
+pupper_motor_model.PupperMotorModel.kp = 4.0
+pupper_motor_model.PupperMotorModel.kd = 0.4
+pupper_motor_model.PupperMotorModel.torque_lower_limits = -0.1 # BUG: no effect
+pupper_motor_model.PupperMotorModel.torque_upper_limits = 0.1 # BUG: no effect
 
-
-         
 
 pupper_v2.Pupper.sensors = %SENSORS
 
