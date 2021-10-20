@@ -62,6 +62,8 @@ def run_example(num_max_steps=_NUM_STEPS):
   env = env_loader.load()
   env.seed(_ENV_RANDOM_SEED)
 
+  env._pybullet_client.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
+
   # motor limits overrides hybrid motor model torque limits here
   # https://github.com/bulletphysics/bullet3/blob/48dc1c45da685c77d3642545c4851b05fb3a1e8b/examples/pybullet/gym/pybullet_envs/minitaur/robots/quadruped_base.py#L131
 
