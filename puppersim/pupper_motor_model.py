@@ -102,8 +102,8 @@ class PupperMotorModel(object):
       torque_upper_limits: Union[float, Tuple[float], np.ndarray] = None,
       velocity_filter_time_constant: float = 0.01,
       torque_time_constant: float = 0.01, # torque filter breaks the simulation
-      motor_damping: float = 0.0045 * 10,
-      motor_friction: float = 0.021 * 5,
+      motor_damping: float = 0.0045,
+      motor_friction: float = 0.021,
       motor_torque_dependent_friction: float = 0.28,    
   ):
     """Initializes the class.
