@@ -69,7 +69,7 @@ class FirstOrderFilter:
     Returns:
       Filtered output
     """
-    if self.state:
+    if self.state is not None:
       self.state = self.alpha * input + (1 - self.alpha) * self.state
     else:
       self.state = input
@@ -92,7 +92,7 @@ class PupperMotorModel(object):
   def __init__(
       self,
       num_motors: int,
-      sampling_time: float,
+      sampling_time: float = 0.001,
       pd_latency: float = 0,
       motor_control_mode=robot_config.MotorControlMode.POSITION,
       kp: Union[float, Tuple[float], np.ndarray] = 60,
