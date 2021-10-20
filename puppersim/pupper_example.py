@@ -38,7 +38,7 @@ flags.DEFINE_bool("run_on_robot", False, "Whether to run on robot or in simulati
 
 FLAGS = flags.FLAGS
 CONFIG_DIR = puppersim.getPupperSimPath()+"/"
-_NUM_STEPS = 10000
+_NUM_STEPS = 100000
 _ENV_RANDOM_SEED = 13
 
 MAX_TORQUE = 1.7 # Maximum torque in [Nm]. For DJI Pupper limited to 7A, the maximum torque pushing against resistance is ~1.7Nm.

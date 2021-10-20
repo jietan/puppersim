@@ -100,10 +100,10 @@ class PupperMotorModel(object):
       strength_ratios: Union[float, Tuple[float], np.ndarray] = 1,
       torque_lower_limits: Union[float, Tuple[float], np.ndarray] = None,
       torque_upper_limits: Union[float, Tuple[float], np.ndarray] = None,
-      velocity_filter_time_constant: float = 0.03,
-      torque_time_constant: float = 0.03,
-      motor_damping: float = 0.0045,
-      motor_friction: float = 0.021,
+      velocity_filter_time_constant: float = 0.01,
+      torque_time_constant: float = 0.01, # torque filter breaks the simulation
+      motor_damping: float = 0.0045 * 10,
+      motor_friction: float = 0.021 * 5,
       motor_torque_dependent_friction: float = 0.28,    
   ):
     """Initializes the class.
@@ -272,6 +272,7 @@ class PupperMotorModel(object):
           "{} is not a supported motor control mode".format(motor_control_mode))
 
     # Apply the output filter to model actuator dynamics
+    # BUG: Causes big instability in the sim
     # motor_torques = self._torque_filter(motor_torques)
 
     # Apply motor damping and friction
