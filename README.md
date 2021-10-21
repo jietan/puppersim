@@ -1,13 +1,29 @@
 # puppersim
 Simulation for DJI Pupper v2 robot
 
-## Usage:
-
+## Installation
+Navigate to the puppersim folder in terminal and run
+```bash
 python setup.py develop
+```
 
-Then run puppersim/pupper_server.py
+## Usage
+### Heuristic control
+Navigate to the outer puppersim folder and run
+```bash
+python puppersim/pupper_server.py
+```
 
-In a separate terminal, run the StanfordQuadruped run_djipupper_sim from this [fork](https://github.com/erwincoumans/StanfordQuadruped).
+Clone the the [heuristic controller](https://github.com/stanfordroboticsclub/StanfordQuadruped.git). Navigate to the StanfordQuadruped controller in terminal and run 
+```bash
+git checkout dji
+```
+This is so you use the version of code for Pupper V2 rather than the servo-based Pupper V1.
+
+In a separate terminal, navigate to StanfordQuadruped and run 
+```bash
+python run_djipupper_sim.py
+```
 
 Keyboard controls:
 * wasd: left joystick
@@ -19,6 +35,17 @@ Keyboard controls:
 * square: u
 * triangle: t
 * circle: c
+
+### Programmatic control
+Navigate to the outer puppersim folder and run
+```bash
+python puppersim/pupper_minimal_server.py
+```
+In a separate terminal, run
+```bash
+python puppersim/pupper_example.py --render=False
+```
+
 
 ## Training a Gym environment
 
