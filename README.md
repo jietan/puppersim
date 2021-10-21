@@ -24,6 +24,19 @@ python3 puppersim/pupper_ars_train.py --rollout_length=200
 ray stop (after training is completed)
 ```
 
+<<<<<<< HEAD
+=======
+Keyboard controls:
+* wasd: left joystick --> moves robot forward/back and left/right
+* arrow keys: right joystick --> turns robot left/right
+* q: L1 --> activates/deactivates robot
+* e: R1 --> starts/stops trotting gait
+* ijkl: d-pad
+* x: X
+* square: u
+* triangle: t
+* circle: c
+>>>>>>> 690a6ab (add movement instructions)
 
 ## Test an ARS policy during training (file location may be different)
 ```
