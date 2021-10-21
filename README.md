@@ -26,10 +26,10 @@ python run_djipupper_sim.py
 ```
 
 Keyboard controls:
-* wasd: left joystick
-* arrow keys: right joystick
-* q: L1
-* e: R1
+* wasd: left joystick --> moves robot forward/back and left/right
+* arrow keys: right joystick --> turns robot left/right
+* q: L1 --> activates/deactivates robot
+* e: R1 --> starts/stops trotting gait
 * ijkl: d-pad
 * x: X
 * square: u
