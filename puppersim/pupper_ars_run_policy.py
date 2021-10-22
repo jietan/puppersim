@@ -133,7 +133,7 @@ def main(argv):
             current_time = env.robot.GetTimeSinceReset()
             expected_duration = current_time - start_time_robot
             actual_duration = time.time() - start_time_wall
-            if actual_duration < expected_duration:
+            if not args.nosleep and actual_duration < expected_duration:
               time.sleep(expected_duration - actual_duration)
             if steps % 10 == 0: 
             	print("Avg time step: ", env.get_time_since_reset() / steps)
