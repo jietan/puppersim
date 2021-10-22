@@ -49,7 +49,7 @@ class PupperGymEnv(gym.Env):
     self.env.update_weights(weights)
     
   def render(self, mode='human', close=False,  **kwargs):
-    return self.env.render(mode, close, kwargs)
+    return self.env.render(mode)
 
   def configure(self, args):
     self.env.configure(args)
