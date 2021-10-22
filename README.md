@@ -54,7 +54,7 @@ You can train the pupper using pybullet [envs_v2](https://github.com/bulletphysi
 ```
 pip install pybullet arspb ray puppersim
 ray start --head
-python puppersim/pupper_ars_train.py --policy_type=linear
+python puppersim/pupper_ars_train.py --rollout_length=200
 python puppersim/pupper_ars_run_policy.py --expert_policy_file=data/lin_policy_plus_best_xxx.npz --json_file=data/params.json
 ```
 
