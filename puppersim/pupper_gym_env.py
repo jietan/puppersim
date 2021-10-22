@@ -26,6 +26,8 @@ class PupperGymEnv(gym.Env):
 
   def __init__(self):
     self.env = create_pupper_env()
+    self.observation_space = self.env.observation_space
+    self.action_space = self.env.action_space
 
   #def _configure(self, display=None):
   #  self.display = display
