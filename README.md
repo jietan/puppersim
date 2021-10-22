@@ -57,6 +57,7 @@ Setup the zero password login for your pupper (Original password on raspberry pi
 
 One time only per computer, run
 ```
+<<<<<<< HEAD
 ssh-keygen
 ```
 One time only per pupper, run
@@ -67,6 +68,12 @@ cat ~/.ssh/id_rsa.pub | ssh pi@`avahi-resolve-host-name raspberrypi.local -4 | a
 * MacOs
 ```
 cat ~/.ssh/id_rsa.pub | ssh pi@raspberrypi.local 'mkdir -p .ssh/ && cat >> .ssh/authorized_keys'
+=======
+pip install pybullet arspb ray puppersim
+ray start --head
+python puppersim/pupper_ars_train.py --rollout_length=200
+python puppersim/pupper_ars_run_policy.py --expert_policy_file=data/lin_policy_plus_best_xxx.npz --json_file=data/params.json
+>>>>>>> 738a846 (Make rollout_length=200 in readme)
 ```
 
 ## Run a pretrained policy on the Pupper robot
