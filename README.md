@@ -1,34 +1,65 @@
 # puppersim
-Simulation for DJI Pupper v2 robot
+Simulation and Reinforcement Learning for DJI Pupper v2 robot
 
-## Usage:
 
-python setup.py develop
-
-Then run puppersim/pupper_server.py
-
-In a separate terminal, run the StanfordQuadruped run_djipupper_sim from this [fork](https://github.com/erwincoumans/StanfordQuadruped).
-
-Keyboard controls:
-* wasd: left joystick
-* arrow keys: right joystick
-* q: L1
-* e: R1
-* ijkl: d-pad
-* x: X
-* square: u
-* triangle: t
-* circle: c
-
-## Training a Gym environment
-
-You can train the pupper using pybullet [envs_v2](https://github.com/bulletphysics/bullet3/tree/master/examples/pybullet/gym/pybullet_envs/minitaur/envs_v2) and this [ARS fork](https://github.com/erwincoumans/ars).
-
+## Conda setup link
 ```
-pip install pybullet arspb ray puppersim
+conda create --name rl_pupper python=3.7
+conda activate rl_pupper
+pip install ray arspb
+```
+
+## Getting the code ready
+```
+git clone https://github.com/jietan/puppersim.git
+cd puppersim
+pip install -e .         (there is a dot at the end)
+python3 puppersim/pupper_example.py       (this verifies the installation, you should see pybullet window show up with a pupper in it)
+```
+
+## Training
+```
 ray start --head
-python puppersim/pupper_ars_train.py --rollout_length=200 --policy_type=linear
-python puppersim/pupper_ars_run_policy.py --expert_policy_file=data/lin_policy_plus_best_xxx.npz --json_file=data/params.json
+python3 puppersim/pupper_ars_train.py --rollout_length=200
+ray stop (after training is completed)
 ```
 
-See a video of a trained policy: https://www.youtube.com/watch?v=JzNsax4M8eg
+
+## Test an ARS policy during training (file location may be different)
+```
+python3 puppersim/pupper_ars_run_policy.py  --expert_policy_file  data/lin_policy_plus_latest.npz  --json_file data/params.json --render
+```
+
+## Prerequisites before deployment to Pupper
+
+Set up Avahi (for linux only, one time only per computer)
+```
+sudo apt install avahi-* (one time)
+```
+Run the following, you should see ip address of pupper
+```
+avahi-resolve-host-name raspberrypi.local -4
+```
+Setup the zero password login for your pupper (Original password on raspberry pi: raspberry)
+
+One time only per computer, run
+```
+ssh-keygen
+```
+One time only per pupper, run
+* Linux
+```
+cat ~/.ssh/id_rsa.pub | ssh pi@`avahi-resolve-host-name raspberrypi.local -4 | awk '{print $2}'` 'mkdir .ssh/ && cat >> .ssh/authorized_keys'
+```
+* MacOs
+```
+cat ~/.ssh/id_rsa.pub | ssh pi@raspberrypi.local 'mkdir -p .ssh/ && cat >> .ssh/authorized_keys'
+```
+
+## Run a pretrained policy on the Pupper robot
+* Turn on the Pupper robot, wait for it to complete the calibration motion.
+* Connect your laptop with the Pupper using an USB-C cable
+* Run the following command on your laptop:
+```
+./deploy_to_robot.sh python3 puppersim/puppersim/pupper_ars_run_policy.py --expert_policy_file=puppersim/data/lin_policy_plus_latest.npz --json_file=puppersim/data/params.json --run_on_robot
+```
