@@ -24,19 +24,6 @@ python3 puppersim/pupper_ars_train.py --rollout_length=200
 ray stop (after training is completed)
 ```
 
-<<<<<<< HEAD
-=======
-Keyboard controls:
-* wasd: left joystick --> moves robot forward/back and left/right
-* arrow keys: right joystick --> turns robot left/right
-* q: L1 --> activates/deactivates robot
-* e: R1 --> starts/stops trotting gait
-* ijkl: d-pad
-* x: X
-* square: u
-* triangle: t
-* circle: c
->>>>>>> 690a6ab (add movement instructions)
 
 ## Test an ARS policy during training (file location may be different)
 ```
@@ -57,7 +44,6 @@ Setup the zero password login for your pupper (Original password on raspberry pi
 
 One time only per computer, run
 ```
-<<<<<<< HEAD
 ssh-keygen
 ```
 One time only per pupper, run
@@ -68,12 +54,6 @@ cat ~/.ssh/id_rsa.pub | ssh pi@`avahi-resolve-host-name raspberrypi.local -4 | a
 * MacOs
 ```
 cat ~/.ssh/id_rsa.pub | ssh pi@raspberrypi.local 'mkdir -p .ssh/ && cat >> .ssh/authorized_keys'
-=======
-pip install pybullet arspb ray puppersim
-ray start --head
-python puppersim/pupper_ars_train.py --rollout_length=200
-python puppersim/pupper_ars_run_policy.py --expert_policy_file=data/lin_policy_plus_best_xxx.npz --json_file=data/params.json
->>>>>>> 738a846 (Make rollout_length=200 in readme)
 ```
 
 ## Run a pretrained policy on the Pupper robot
