@@ -117,17 +117,24 @@ def main(argv):
         done = False
         totalr = 0.
         steps = 0
+        start_time = env.robot.GetTimeSinceReset()
+        current_time = start_time
         while not done:
+            start_time_robot = current_time
+            start_time_wall = time.time()
             action = policy.act(obs)
             #action[0:12] = 0
             observations.append(obs)
             actions.append(action)
-            
-            #time.sleep(1)
+                        
             obs, r, done, _ = env.step(action)
             totalr += r
             steps += 1
-            
+            current_time = env.robot.GetTimeSinceReset()
+            expected_duration = current_time - start_time_robot
+            actual_duration = time.time() - start_time_wall
+            if not args.nosleep and actual_duration < expected_duration:
+              time.sleep(expected_duration - actual_duration)
             if steps % 10 == 0: 
             	print("Avg time step: ", env.get_time_since_reset() / steps)
             #	print("sim time {}, actual time: {}".format(env.get_time_since_reset(), time.time() - start_time))
