@@ -3,6 +3,7 @@ Simulation and Reinforcement Learning for DJI Pupper v2 robot
 
 
 ## Conda setup link
+Install [conda](https://docs.conda.io/en/latest/miniconda.html), then
 ```
 conda create --name rl_pupper python=3.7
 conda activate rl_pupper
@@ -16,6 +17,16 @@ cd puppersim
 pip install -e .         (there is a dot at the end)
 python3 puppersim/pupper_example.py       (this verifies the installation, you should see pybullet window show up with a pupper in it)
 ```
+
+If pupper_example.py is running very slowly, try
+```bash
+python3 puppersim/pupper_minimal_server.py
+```
+then in a new terminal tab/window
+```bash
+python3 puppersim/pupper_example.py --render=False
+```
+This runs the visualizer GUI and simulator as two separate processes.
 
 ## Training
 ```
@@ -67,7 +78,7 @@ cat ~/.ssh/id_rsa.pub | ssh pi@raspberrypi.local 'mkdir -p .ssh/ && cat >> .ssh/
 ## Using the heuristic control
 Navigate to the outer puppersim folder and run
 ```bash
-python puppersim/pupper_server.py
+python3 puppersim/pupper_server.py
 ```
 
 Clone the the [heuristic controller](https://github.com/stanfordroboticsclub/StanfordQuadruped.git):
@@ -80,7 +91,7 @@ The `dji` branch is checked out so you can use the version of code for Pupper V2
 
 In a separate terminal, navigate to StanfordQuadruped and run 
 ```bash
-python run_djipupper_sim.py
+python3 run_djipupper_sim.py
 ```
 
 Keyboard controls:
