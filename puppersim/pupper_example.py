@@ -63,6 +63,7 @@ def run_example(num_max_steps=_NUM_STEPS):
   env.seed(_ENV_RANDOM_SEED)
 
   env._pybullet_client.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
+  env._pybullet_client.configureDebugVisualizer(p.COV_ENABLE_SHADOWS, 0)
 
   # BUG: the motor limits defined by the robot override those of the motor model here
   # https://github.com/bulletphysics/bullet3/blob/48dc1c45da685c77d3642545c4851b05fb3a1e8b/examples/pybullet/gym/pybullet_envs/minitaur/robots/quadruped_base.py#L131
@@ -89,7 +90,6 @@ def run_example(num_max_steps=_NUM_STEPS):
 
     # you can increase/decrease the sleep time to make the simulator
     # go slower/faster up to a certain point
-    time.sleep(0.0006)
     if i % 100 == 0:
       print("obs: ", obs)
       print("act: ", action)

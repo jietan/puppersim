@@ -100,11 +100,10 @@ class PupperMotorModel(object):
       strength_ratios: Union[float, Tuple[float], np.ndarray] = 1,
       torque_lower_limits: Union[float, Tuple[float], np.ndarray] = None,
       torque_upper_limits: Union[float, Tuple[float], np.ndarray] = None,
-      velocity_filter_time_constant: float = 0.01,
-      torque_time_constant: float = 0.01, # torque filter breaks the simulation
-      motor_damping: float = 0.0045,
-      motor_friction: float = 0.021,
-      motor_torque_dependent_friction: float = 0.28,    
+      velocity_filter_time_constant: float = 0.0,
+      torque_time_constant: float = 0.0, # BUG: torque filter causes instability
+      motor_damping: float = 0.0,
+      motor_torque_dependent_friction: float = 0.0,    
   ):
     """Initializes the class.
 
@@ -130,8 +129,8 @@ class PupperMotorModel(object):
       velocity_filter_time_constant: Time constant for the velocity filter.
       torque_time_constant: Time constant for the actuator's transfer 
         function between requested torque and actual torque.
-      motor_damping: Damping in [Nm/(rad/s)] of the motor output.
-      motor_friction: Coulomb friction in [Nm] of the motor output.
+      motor_damping: Damping in [Nm/(rad/s)] of the motor output. Note that
+        coulomb friction is handled by pybullet directly
       motor_torque_dependent_friction: Coulomb friction per Nm of motor torque, unitless.
 
     Raises:
@@ -166,7 +165,6 @@ class PupperMotorModel(object):
                                                       sampling_time=sampling_time)
 
     self._motor_damping = motor_damping
-    self._motor_friction = motor_friction
     self._motor_torque_dependent_friction = motor_torque_dependent_friction
 
     self._previous_true_motor_velocity = 0.0
@@ -279,7 +277,6 @@ class PupperMotorModel(object):
     motor_torques -= (np.sign(self._previous_true_motor_velocity) *
                       self._motor_torque_dependent_friction *
                       motor_torques)
-    motor_torques -= np.sign(self._previous_true_motor_velocity) * self._motor_friction
     motor_torques -= self._previous_true_motor_velocity * self._motor_damping
 
     # Rescale and clip the motor torques as needed.
