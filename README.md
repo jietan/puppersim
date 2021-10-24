@@ -63,3 +63,33 @@ cat ~/.ssh/id_rsa.pub | ssh pi@raspberrypi.local 'mkdir -p .ssh/ && cat >> .ssh/
 ```
 ./deploy_to_robot.sh python3 puppersim/puppersim/pupper_ars_run_policy.py --expert_policy_file=puppersim/data/lin_policy_plus_latest.npz --json_file=puppersim/data/params.json --run_on_robot
 ```
+
+## Using the heuristic control
+Navigate to the outer puppersim folder and run
+```bash
+python puppersim/pupper_server.py
+```
+
+Clone the the [heuristic controller](https://github.com/stanfordroboticsclub/StanfordQuadruped.git):
+```bash
+git clone https://github.com/stanfordroboticsclub/StanfordQuadruped.git
+cd StanfordQuadruped
+git checkout dji
+```
+The `dji` branch is checked out so you can use the version of code for Pupper V2 rather than the servo-based Pupper V1.
+
+In a separate terminal, navigate to StanfordQuadruped and run 
+```bash
+python run_djipupper_sim.py
+```
+
+Keyboard controls:
+* wasd: left joystick --> moves robot forward/back and left/right
+* arrow keys: right joystick --> turns robot left/right
+* q: L1 --> activates/deactivates robot
+* e: R1 --> starts/stops trotting gait
+* ijkl: d-pad
+* x: X
+* square: u
+* triangle: t
+* circle: c
