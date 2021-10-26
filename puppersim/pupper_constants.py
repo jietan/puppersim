@@ -125,7 +125,7 @@ HIP_POSITIONS = collections.OrderedDict((
 MOTOR_ACTION_LOWER_LIMIT = np.array([-0.18,0.1,-2.3]*4)
 MOTOR_ACTION_UPPER_LIMIT = np.array([0.18,0.7,-0.6]*4)
   
-JOINT_FRICTION_FORCE = 0 #friction force in Newton
+JOINT_FRICTION_FORCE = 0.021 # friction torque [Nm]
 
 # Add the gin constants to be used for gin binding in config. Append "PUPPER_"
 # for unique binding names.
