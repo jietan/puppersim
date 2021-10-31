@@ -228,7 +228,7 @@ class PupperRobot(quadruped_base.QuadrupedBase):
       and latency. The unit is rad.
     """
     #raise NotImplementedError('Not yet implemented!')
-    return np.array([0, 0, 0])
+    return np.asarray([self._robot_state.roll, self._robot_state.pitch, self._robot_state.yaw])
 
   @property
   def motor_angles(self):
@@ -281,7 +281,7 @@ class PupperRobot(quadruped_base.QuadrupedBase):
       rate of (roll, pitch, yaw) change of the robot's base. This is always in
       the local frame of the base.
     """
-    raise NotImplementedError('Not yet implemented!')
+    return np.asarray([self._robot_state.roll_rate, self._robot_state.pitch_rate, self._robot_state.yaw_rate])
 
   @property
   def base_acceleration_accelerometer(self):
