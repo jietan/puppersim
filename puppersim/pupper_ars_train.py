@@ -498,13 +498,11 @@ if __name__ == '__main__':
     parser.add_argument('--filter', type=str, default='MeanStdFilter')
     parser.add_argument('--activation', type=str, help="Neural network policy activation function, tanh or clip", default="tanh")
     parser.add_argument('--policy_network_size', action='store', dest='policy_network_size_list',type=str, nargs='*', default='64,64')
-    parser.add_argument('--redis_address', type=str, default=socket.gethostbyname(socket.gethostname())+':6379') 
    
     args = parser.parse_args()
 
 
-    print("redis_address=", args.redis_address)
-    ray.init(redis_address=args.redis_address)
+    ray.init()#redis_address="127.0.0.1:6379")
  
     params = vars(args)
     run_ars(params)
