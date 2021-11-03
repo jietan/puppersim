@@ -504,7 +504,7 @@ if __name__ == '__main__':
 
 
     print("redis_address=", args.redis_address)
-    ray.init(redis_address=args.redis_address)
+    ray.init(address=args.redis_address)
  
     params = vars(args)
     run_ars(params)
