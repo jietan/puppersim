@@ -10,6 +10,7 @@ import time
 import os
 import numpy as np
 import gym
+from packaging import version
 
 import arspb.logz as logz
 import ray
@@ -504,7 +505,10 @@ if __name__ == '__main__':
 
 
     print("redis_address=", args.redis_address)
-    ray.init(redis_address=args.redis_address)
+    if version.parse(ray.__version__) >= version.parse("1.6.0"):
+      ray.init(address=args.redis_address)
+    else:
+      ray.init(redis_address=args.redis_address)
  
     params = vars(args)
     run_ars(params)
