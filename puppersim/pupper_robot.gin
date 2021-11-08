@@ -17,10 +17,22 @@ import pybullet_envs.minitaur.robots.robot_config
 UPPER_BOUND = 6.28318548203
 LOWER_BOUND = -6.28318548203
 SIM_TIME_STEP = 0.001
-NUM_ACTION_REPEAT = 2
+NUM_ACTION_REPEAT = 1
+
+imu_sensor.IMUSensor.channels = [
+    %imu_sensor.IMUChannel.ROLL,
+    %imu_sensor.IMUChannel.PITCH,
+    %imu_sensor.IMUChannel.ROLL_RATE,
+    %imu_sensor.IMUChannel.PITCH_RATE,
+]
+
+imu_sensor.IMUSensor.lower_bound = [-6.28318548203, -6.28318548203,
+                                       -6283.18554688, -6283.18554688]
+imu_sensor.IMUSensor.upper_bound = [6.28318548203, 6.28318548203,
+                                       6283.18554688, 6283.18554688]
 
 # We use the default confirugration for MotorAngleSensor, which reads limits from the robot.
-SENSORS = [@motor_angle_sensor.MotorAngleSensor()]
+SENSORS = [@imu_sensor.IMUSensor(), @motor_angle_sensor.MotorAngleSensor()]
 locomotion_gym_config.SimulationParameters.sim_time_step_s = %SIM_TIME_STEP
 locomotion_gym_config.SimulationParameters.num_action_repeat = %NUM_ACTION_REPEAT
 locomotion_gym_config.SimulationParameters.enable_rendering = False
@@ -52,8 +64,4 @@ hybrid_motor_model.HybridMotorModel.kp = 16
 hybrid_motor_model.HybridMotorModel.kd = .1
 hybrid_motor_model.HybridMotorModel.strength_ratios = 1
 hybrid_motor_model.HybridMotorModel.torque_lower_limits = 0
-hybrid_motor_model.HybridMotorModel.torque_upper_limits = 0
-
-env_loader.load.wrapper_classes = [
-    @observation_dictionary_to_array_wrapper.ObservationDictionaryToArrayWrapper]
-    
+hybrid_motor_model.HybridMotorModel.torque_upper_limits = 0    

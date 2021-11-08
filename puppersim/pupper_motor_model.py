@@ -273,6 +273,9 @@ class PupperMotorModel(object):
     # BUG: Causes big instability in the sim
     # motor_torques = self._torque_filter(motor_torques)
 
+    # Hard-code torque limits until the torque limit bug is fixed
+    motor_torques = np.clip(motor_torques, -1.7, 1.7)
+
     # Apply motor damping and friction
     motor_torques -= (np.sign(self._previous_true_motor_velocity) *
                       self._motor_torque_dependent_friction *
