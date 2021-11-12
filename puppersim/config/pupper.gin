@@ -72,7 +72,7 @@ pupper_motor_model.PupperMotorModel.torque_upper_limits = 0.1 # BUG: no effect
 
 pupper_motor_model.PupperMotorModel.sampling_time = %SIM_TIME_STEP
 pupper_motor_model.PupperMotorModel.velocity_filter_time_constant = 0.01 # [s]
-pupper_motor_model.PupperMotorModel.motor_damping = 0.0045 # [Nm/A]
+pupper_motor_model.PupperMotorModel.motor_damping = 0.0045 # [Nm/(rad/s)]
 pupper_motor_model.PupperMotorModel.motor_torque_dependent_friction = 0.28 # [unitless]
 
 # BUG: not used because it introduces instability

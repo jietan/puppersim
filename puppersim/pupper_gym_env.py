@@ -10,10 +10,10 @@ from pybullet_envs.minitaur.envs_v2 import env_loader
 import puppersim.data as pd
 
 def create_pupper_env():
-  CONFIG_DIR = puppersim.getPupperSimPath()+"/"
-  _CONFIG_FILE = os.path.join(CONFIG_DIR, "pupper_pmtg.gin")
-#  _NUM_STEPS = 10000
-#  _ENV_RANDOM_SEED = 2
+  CONFIG_DIR = puppersim.getPupperSimPath()
+  _CONFIG_FILE = os.path.join(CONFIG_DIR, "config", "pupper_pmtg.gin")
+  #  _NUM_STEPS = 10000
+  #  _ENV_RANDOM_SEED = 2
 
   gin.bind_parameter("scene_base.SceneBase.data_root", pd.getDataPath()+"/")
   gin.parse_config_file(_CONFIG_FILE)
@@ -47,13 +47,14 @@ class PupperGymEnv(gym.Env):
 
   def update_weights(self, weights):
     self.env.update_weights(weights)
-    
+
   def render(self, mode='human', close=False,  **kwargs):
     return self.env.render(mode)
 
   def configure(self, args):
     self.env.configure(args)
-    
+
   def close(self):
     self.env.close()
+
     

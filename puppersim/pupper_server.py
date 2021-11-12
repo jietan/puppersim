@@ -44,24 +44,24 @@ p.setTimeStep(1. / 240.)
 
 globalScaling=0.5
 p.loadURDF(pybullet_data.getDataPath()+"/plane.urdf",[0,0,-0.01])
-p.loadURDF("concrete_plane.urdf")
+# p.loadURDF("concrete_plane.urdf")
 
-p.loadURDF("cone.urdf",[0.6,-0.1,0.0])
-p.loadURDF("cone.urdf",[.98,0.,0.0])
-p.loadURDF("cone.urdf",[1.34,-0.1,0.0])
-p.loadURDF("cone.urdf",[1.62,0.,0.0])
-p.loadURDF("cone.urdf",[1.9,-0.1,0.0])
-ramp_orn1 = p.getQuaternionFromEuler([0,0,-math.pi/4])
-ramp_orn2 = p.getQuaternionFromEuler([0,0,math.pi-math.pi/4])
-p.loadURDF("ramp.urdf",[1-0.253,-1-0.253,0.11], ramp_orn1)
-p.loadURDF("ramp.urdf",[1+0.253,-1+0.253,0.11], ramp_orn2)
-load_parkour = False
-if load_parkour:
-  objects = [p.loadURDF("parkour/parkour.urdf", [globalScaling*2.000000,globalScaling*-2.000000,0.00000],[0.000000,0.000000,-0.707107,0.707107],useFixedBase=True, globalScaling=globalScaling)]
-  ob = objects[0]
-  jointPositions=[ 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000 ]
-  for jointIndex in range (p.getNumJoints(ob)):
-          p.resetJointState(ob,jointIndex,jointPositions[jointIndex])
+# p.loadURDF("cone.urdf",[0.6,-0.1,0.0])
+# p.loadURDF("cone.urdf",[.98,0.,0.0])
+# p.loadURDF("cone.urdf",[1.34,-0.1,0.0])
+# p.loadURDF("cone.urdf",[1.62,0.,0.0])
+# p.loadURDF("cone.urdf",[1.9,-0.1,0.0])
+# ramp_orn1 = p.getQuaternionFromEuler([0,0,-math.pi/4])
+# ramp_orn2 = p.getQuaternionFromEuler([0,0,math.pi-math.pi/4])
+# p.loadURDF("ramp.urdf",[1-0.253,-1-0.253,0.11], ramp_orn1)
+# p.loadURDF("ramp.urdf",[1+0.253,-1+0.253,0.11], ramp_orn2)
+# load_parkour = False
+# if load_parkour:
+#   objects = [p.loadURDF("parkour/parkour.urdf", [globalScaling*2.000000,globalScaling*-2.000000,0.00000],[0.000000,0.000000,-0.707107,0.707107],useFixedBase=True, globalScaling=globalScaling)]
+#   ob = objects[0]
+#   jointPositions=[ 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000 ]
+#   for jointIndex in range (p.getNumJoints(ob)):
+#           p.resetJointState(ob,jointIndex,jointPositions[jointIndex])
 
 # more complex environments can be loaded as well, check out
 # see https://github.com/erwincoumans/aws-robomaker-racetrack-world
@@ -81,7 +81,7 @@ shift2 = [0,0,0]
 meshScale = [1, 1, 1]
 
 
-robot = p.loadURDF("pupper_v2a.urdf",[0,0,0.23], p.getQuaternionFromEuler([0,0,math.pi/2.]), useFixedBase=False)
+robot = p.loadURDF("pupper_v2a.urdf",[0,0,0.23], p.getQuaternionFromEuler([0,0,math.pi/2.]), useFixedBase=True)
 
 #p.changeVisualShape(robot,-1,rgbaColor=[1,0,0,1])
 jointIds=[]
