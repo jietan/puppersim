@@ -79,3 +79,6 @@ pupper_motor_model.PupperMotorModel.motor_torque_dependent_friction = 0.28 # [un
 pupper_motor_model.PupperMotorModel.torque_time_constant = 0.01
 
 pupper_v2.Pupper.sensors = %SENSORS    
+env_loader.load.wrapper_classes = [
+    @observation_dictionary_to_array_wrapper.ObservationDictionaryToArrayWrapper]    
+
