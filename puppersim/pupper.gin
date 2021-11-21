@@ -10,6 +10,7 @@ import puppersim.pupper_motor_model
 import puppersim.pupper_constants
 import puppersim.pupper_locomotion_task
 import puppersim.pupper_terminal_conditions
+import puppersim.pupper_time_sensor
 
 import puppersim.pupper_v2
 import pybullet_envs.minitaur.robots.robot_config
@@ -34,7 +35,9 @@ imu_sensor.IMUSensor.upper_bound = [6.28318548203, 6.28318548203,
                                        6283.18554688, 6283.18554688]
 
 # We use the default confirugration for MotorAngleSensor, which reads limits from the robot.
-SENSORS = [@imu_sensor.IMUSensor(), @motor_angle_sensor.MotorAngleSensor()]
+SENSORS = [@motor_angle_sensor.MotorAngleSensor(), @pupper_time_sensor.PeriodicSignalSensor()]
+pupper_time_sensor.PeriodicSignalSensor.frequencies = [1]
+
 locomotion_gym_config.SimulationParameters.sim_time_step_s = %SIM_TIME_STEP
 locomotion_gym_config.SimulationParameters.num_action_repeat = %NUM_ACTION_REPEAT
 locomotion_gym_config.SimulationParameters.enable_rendering = False
