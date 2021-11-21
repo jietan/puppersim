@@ -25,7 +25,6 @@ import gin
 import math
 import numpy as np
 
-from pybullet_envs.minitaur.agents.baseline_controller import static_gait_controller
 from pybullet_envs.minitaur.envs_v2 import env_loader
 import pybullet as p
 import puppersim
@@ -34,6 +33,7 @@ import os
 
 
 flags.DEFINE_bool("render", True, "Whether to render the example.")
+flags.DEFINE_bool("profile", False, "Whether to print timing results for different parts of the code.")
 flags.DEFINE_bool("run_on_robot", False, "Whether to run on robot or in simulation.")
 
 FLAGS = flags.FLAGS
@@ -73,27 +73,28 @@ def run_example(num_max_steps=_NUM_STEPS):
 
   print("env.action_space=",env.action_space)
   obs = env.reset()
-  policy = static_gait_controller.StaticGaitController(env.robot)
-
+  last_control_step = time.time()
   for i in range(num_max_steps):
-    joint_angles = np.zeros((3, 4))
     delta_time = env.robot.GetTimeSinceReset()
     # 1Hz signal
     phase = delta_time * 2 * np.pi 
-
     # joint angles corresponding to a standing position
     action = np.array([0, 0.6,-1.2,0, 0.6,-1.2,0, 0.6,-1.2,0, 0.6,-1.2])
     # modulate the default joint angles by a sinusoid to make the robot do pushups
     action = (np.sin(phase) * 0.6 + 0.8) * action
+    # NOTE: We do not fix the loop rate so be careful if using a policy that is solely dependent on time
 
+    before_step_timestamp = time.time()
     obs, reward, done, _ = env.step(action)
-
-    # you can increase/decrease the sleep time to make the simulator
-    # go slower/faster up to a certain point
-    if i % 100 == 0:
+    after_step_timestamp = time.time()
+    if FLAGS.profile:
+      print("loop_dt: ", time.time() - last_control_step, "env.step(): ", after_step_timestamp - before_step_timestamp)
+    else:
       print("obs: ", obs)
       print("act: ", action)
       print("time: ", delta_time)
+
+    last_control_step = time.time()
 
 
 def main(_):

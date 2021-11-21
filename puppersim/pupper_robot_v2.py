@@ -39,6 +39,7 @@ class PupperRobot(quadruped_base.QuadrupedBase):
     super().__init__(**kwargs)
     self._clock = time.time
 
+    self._profile = False
 
   def _pre_load(self):
     """Import the Pupper specific constants."""
@@ -158,9 +159,12 @@ class PupperRobot(quadruped_base.QuadrupedBase):
       time_since_start = self._clock() - sequence_start_time
 
   def _get_state(self):
+    start = time.time()
     self._hardware_interface.read_incoming_data()
     self._robot_state = self._hardware_interface.robot_state
     self.last_state_time = self._clock()
+    if self._profile:
+      print("PupperRobot._get_state(): ", time.time() - start)
 
   def apply_action(self, motor_commands, motor_control_mode=None):
     """Apply the motor commands using the motor model.
@@ -170,6 +174,7 @@ class PupperRobot(quadruped_base.QuadrupedBase):
         or motor pwms (for Minitaur only).
       motor_control_mode: A MotorControlMode enum.
     """
+    start = time.time()
     if self._robot_state is None:
       raise AssertionError(
           'No state has been received! Is reset() called before?')
@@ -181,7 +186,8 @@ class PupperRobot(quadruped_base.QuadrupedBase):
       self._hardware_interface.set_actuator_postions(np.array(motor_commands))
     else:
       raise ValueError('{} is not implemented'.format(motor_control_mode))
-
+    if self._profile:
+      print("PupperRobot.apply_action(): ", time.time() - start)
 
   def receive_observation(self):
     """Receives the observation from the robot."""
