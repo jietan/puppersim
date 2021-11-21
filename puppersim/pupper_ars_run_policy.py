@@ -25,6 +25,7 @@ import os
 import puppersim
 import gin
 from pybullet_envs.minitaur.envs_v2 import env_loader
+from pybullet import COV_ENABLE_GUI
 import puppersim.data as pd
 
 def create_pupper_env(args):
@@ -37,117 +38,120 @@ def create_pupper_env(args):
   gin.parse_config_file(_CONFIG_FILE)
   gin.bind_parameter("SimulationParameters.enable_rendering", args.render)
   env = env_loader.load()
+  env._pybullet_client.configureDebugVisualizer(COV_ENABLE_GUI, 0)
   
   return env
-  
-  
+
+
 def main(argv):
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--expert_policy_file', type=str, default="")
-    parser.add_argument('--nosleep', action='store_true')
+  import argparse
+  parser = argparse.ArgumentParser()
+  parser.add_argument('--expert_policy_file', type=str, default="data/lin_policy_plus_latest.npz", help='relative path to the policy weights. Defaults to where ars_train outputs weight file.')
+  parser.add_argument('--nosleep', action='store_true', help='whether to sleep during the control loop to make it realtime. Does not apply to running on the robot. Default is False.')
 
-    parser.add_argument('--num_rollouts', type=int, default=20,
-                        help='Number of expert rollouts')
-    parser.add_argument('--json_file', type=str, default="")
-    parser.add_argument('--run_on_robot', action='store_true')
-    parser.add_argument('--render', action='store_true')
-    if len(argv):
-      args = parser.parse_args(argv)
-    else:
-      args = parser.parse_args()
+  parser.add_argument('--num_rollouts', type=int, default=20,
+                      help='Number of expert rollouts. Default is 20.')
+  parser.add_argument('--json_file', type=str, default="data/params.json", help='relative path to the policy parameters file. Defaults to where ars_train outputs params file.')
+  parser.add_argument('--run_on_robot', action='store_true', help='whether to run the policy on the robot instead of in simulation. Default is False.')
+  parser.add_argument('--render', default=True, action='store_true', help='whether to render the robot. Default is True.')
+  parser.add_argument('--profile', default=False, action='store_true', help='whether to print timing for parts of the code. Default is False.')
+  if len(argv):
+    args = parser.parse_args(argv)
+  else:
+    args = parser.parse_args()
 
-    print('loading and building expert policy')
-    if len(args.json_file)==0:
-      args.json_file = tp.getDataPath()+"/"+ args.envname+"/params.json"    
-    with open(args.json_file) as f:
-       params = json.load(f)
-    print("params=",params)
-    if len(args.expert_policy_file)==0:
-      args.expert_policy_file=tp.getDataPath()+"/"+args.envname+"/nn_policy_plus.npz" 
-      if not os.path.exists(args.expert_policy_file):
-        args.expert_policy_file=tp.getDataPath()+"/"+args.envname+"/lin_policy_plus.npz"
-    data = np.load(args.expert_policy_file, allow_pickle=True)
+  print('loading and building expert policy')
+  if len(args.json_file)==0:
+    args.json_file = tp.getDataPath()+"/"+ args.envname+"/params.json"    
+  with open(args.json_file) as f:
+      params = json.load(f)
+  print("params=",params)
+  if len(args.expert_policy_file)==0:
+    args.expert_policy_file=tp.getDataPath()+"/"+args.envname+"/nn_policy_plus.npz" 
+    if not os.path.exists(args.expert_policy_file):
+      args.expert_policy_file=tp.getDataPath()+"/"+args.envname+"/lin_policy_plus.npz"
+  data = np.load(args.expert_policy_file, allow_pickle=True)
 
-    print('create gym environment:', params["env_name"])
-    env = create_pupper_env(args)#gym.make(params["env_name"])
+  print('create gym environment:', params["env_name"])
+  env = create_pupper_env(args)#gym.make(params["env_name"])
 
 
-    lst = data.files
-    weights = data[lst[0]][0]
-    mu = data[lst[0]][1]
-    print("mu=",mu)
-    std = data[lst[0]][2]
-    print("std=",std)
-        
-    ob_dim = env.observation_space.shape[0]
-    ac_dim = env.action_space.shape[0]
-    ac_lb = env.action_space.low
-    ac_ub = env.action_space.high
-    
-    policy_params={'type': params["policy_type"],
+  lst = data.files
+  weights = data[lst[0]][0]
+  mu = data[lst[0]][1]
+  print("mu=",mu)
+  std = data[lst[0]][2]
+  print("std=",std)
+
+  ob_dim = env.observation_space.shape[0]
+  ac_dim = env.action_space.shape[0]
+  ac_lb = env.action_space.low
+  ac_ub = env.action_space.high
+
+  policy_params={'type': params["policy_type"],
                    'ob_filter':params['filter'],
                    'ob_dim':ob_dim,
                    'ac_dim':ac_dim,
                    'action_lower_bound' : ac_lb,
                    'action_upper_bound' : ac_ub,
-    }
-    policy_params['weights'] = weights
-    policy_params['observation_filter_mean'] = mu
-    policy_params['observation_filter_std'] = std
-    if params["policy_type"]=="nn":
-      print("FullyConnectedNeuralNetworkPolicy")
-      policy_sizes_string = params['policy_network_size_list'].split(',')
-      print("policy_sizes_string=",policy_sizes_string)
-      policy_sizes_list = [int(item) for item in policy_sizes_string]
-      print("policy_sizes_list=",policy_sizes_list)
-      policy_params['policy_network_size'] = policy_sizes_list
-      policy = FullyConnectedNeuralNetworkPolicy(policy_params, update_filter=False)
-    else:
-      print("LinearPolicy2")
-      policy = LinearPolicy2(policy_params, update_filter=False)
-    policy.get_weights()
-   
-    returns = []
-    observations = []
-    actions = []
-    for i in range(args.num_rollouts):
-        print('iter', i)
-        obs = env.reset()
-        done = False
-        totalr = 0.
-        steps = 0
-        start_time = env.robot.GetTimeSinceReset()
-        current_time = start_time
-        while not done:
-            start_time_robot = current_time
-            start_time_wall = time.time()
-            action = policy.act(obs)
-            #action[0:12] = 0
-            observations.append(obs)
-            actions.append(action)
-                        
-            obs, r, done, _ = env.step(action)
-            totalr += r
-            steps += 1
-            current_time = env.robot.GetTimeSinceReset()
-            expected_duration = current_time - start_time_robot
-            actual_duration = time.time() - start_time_wall
-            if not args.nosleep and actual_duration < expected_duration:
-              time.sleep(expected_duration - actual_duration)
-            if steps % 10 == 0: 
-            	print("Avg time step: ", env.get_time_since_reset() / steps)
-            #	print("sim time {}, actual time: {}".format(env.get_time_since_reset(), time.time() - start_time))
-            
-            #if steps >= env.spec.timestep_limit:
-            #    break
-        #print("steps=",steps)
-        returns.append(totalr)
+  }
+  policy_params['weights'] = weights
+  policy_params['observation_filter_mean'] = mu
+  policy_params['observation_filter_std'] = std
+  if params["policy_type"]=="nn":
+    print("FullyConnectedNeuralNetworkPolicy")
+    policy_sizes_string = params['policy_network_size_list'].split(',')
+    print("policy_sizes_string=",policy_sizes_string)
+    policy_sizes_list = [int(item) for item in policy_sizes_string]
+    print("policy_sizes_list=",policy_sizes_list)
+    policy_params['policy_network_size'] = policy_sizes_list
+    policy = FullyConnectedNeuralNetworkPolicy(policy_params, update_filter=False)
+  else:
+    print("LinearPolicy2")
+    policy = LinearPolicy2(policy_params, update_filter=False)
+  policy.get_weights()
 
-    print('returns', returns)
-    print('mean return', np.mean(returns))
-    print('std of return', np.std(returns))
-    
+  returns = []
+  observations = []
+  actions = []
+  for i in range(args.num_rollouts):
+    print('iter', i)
+    obs = env.reset()
+    done = False
+    totalr = 0.
+    steps = 0
+    start_time = env.robot.GetTimeSinceReset()
+    current_time = start_time
+    last_loop = time.time()
+    while not done:
+      start_time_robot = current_time
+      start_time_wall = time.time()
+      before_policy = time.time()
+      action = policy.act(obs)
+      after_policy = time.time()
+
+      if not args.run_on_robot:
+        observations.append(obs)
+        actions.append(action)
+
+      obs, r, done, _ = env.step(action)
+      totalr += r
+      steps += 1
+      current_time = env.robot.GetTimeSinceReset()
+      expected_duration = current_time - start_time_robot
+      actual_duration = time.time() - start_time_wall
+      if not args.nosleep and actual_duration < expected_duration and not args.run_on_robot:
+        time.sleep(expected_duration - actual_duration)
+      if args.profile:
+        print('policy.act(obs): ', after_policy - before_policy)
+        print('wallclock_loop_dt: ', time.time() - last_loop)
+      last_loop = time.time()
+    returns.append(totalr)
+
+  print('returns: ', returns)
+  print('mean return: ', np.mean(returns))
+  print('std of return: ', np.std(returns))
+
 if __name__ == '__main__':
-    import sys
-    main(sys.argv[1:])
+  import sys
+  main(sys.argv[1:])
