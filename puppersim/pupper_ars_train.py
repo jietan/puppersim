@@ -30,8 +30,8 @@ from pybullet_envs.minitaur.envs_v2 import env_loader
 import puppersim.data as pd
 
 def create_pupper_env():
-  CONFIG_DIR = puppersim.getPupperSimPath()+"/"
-  _CONFIG_FILE = os.path.join(CONFIG_DIR, "pupper_pmtg.gin")
+  CONFIG_DIR = puppersim.getPupperSimPath()
+  _CONFIG_FILE = os.path.join(CONFIG_DIR, "config", "pupper_pmtg.gin")
 #  _NUM_STEPS = 10000
 #  _ENV_RANDOM_SEED = 2 
    

@@ -37,7 +37,7 @@ flags.DEFINE_bool("profile", False, "Whether to print timing results for differe
 flags.DEFINE_bool("run_on_robot", False, "Whether to run on robot or in simulation.")
 
 FLAGS = flags.FLAGS
-CONFIG_DIR = puppersim.getPupperSimPath()+"/"
+CONFIG_DIR = puppersim.getPupperSimPath()
 _NUM_STEPS = 100000
 _ENV_RANDOM_SEED = 13
 
@@ -45,9 +45,9 @@ MAX_TORQUE = 1.7 # Maximum torque in [Nm]. For DJI Pupper limited to 7A, the max
 
 def _load_config(render=False):
   if FLAGS.run_on_robot:
-    config_file = os.path.join(CONFIG_DIR, "pupper_robot.gin")
+    config_file = os.path.join(CONFIG_DIR, "config", "pupper_robot.gin")
   else:
-    config_file = os.path.join(CONFIG_DIR, "pupper.gin")
+    config_file = os.path.join(CONFIG_DIR, "config", "pupper.gin")
 
   gin.parse_config_file(config_file)
   gin.bind_parameter("SimulationParameters.enable_rendering", render)
