@@ -25,11 +25,12 @@ for j in range(p.getNumJoints(pupper)):
     jointIds.append(j)
     paramIds.append(p.addUserDebugParameter(jointName.decode("utf-8"), -4, 4, 0))
 
-p.setRealTimeSimulation(1)
+# p.setRealTimeSimulation(1)
 while (1):
   p.setGravity(0, 0, p.readUserDebugParameter(gravId))
   for i in range(len(paramIds)):
     c = paramIds[i]
-    targetPos = p.readUserDebugParameter(c)
-    p.setJointMotorControl2(pupper, jointIds[i], p.POSITION_CONTROL, targetPos, force=5 * 240.)
-  time.sleep(0.01)
+    torque = 100*p.readUserDebugParameter(c)
+    p.setJointMotorControl2(pupper, jointIds[i], p.TORQUE_CONTROL, force=torque)
+  time.sleep(0.005)
+  p.stepSimulation()

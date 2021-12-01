@@ -105,7 +105,9 @@ class SimpleForwardTask(task_interface.Task):
       action_acceleration_penalty = (
           float(self._weight_action_accel) * np.mean(np.abs(acc)))
 
-    reward = velocity
+    c = 20
+    desired_velocity = 10
+    reward = c - (desired_velocity-velocity)/velocity
     reward -= action_acceleration_penalty
 
     # Energy
@@ -113,7 +115,7 @@ class SimpleForwardTask(task_interface.Task):
       energy_reward = -task_utils.calculate_estimated_energy_consumption(
           self._env.robot.motor_torques, self._env.robot.motor_velocities,
           self._env.sim_time_step, self._env.num_action_repeat)
-      reward += energy_reward * self._energy_penalty_coef
+      # reward += energy_reward * self._energy_penalty_coef
 
     return reward * self._weight
 
