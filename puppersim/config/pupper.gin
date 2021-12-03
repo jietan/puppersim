@@ -19,7 +19,7 @@ import pybullet_envs.minitaur.robots.robot_config
 UPPER_BOUND = 6.28318548203
 LOWER_BOUND = -6.28318548203
 SIM_TIME_STEP = 0.001
-NUM_ACTION_REPEAT = 28
+NUM_ACTION_REPEAT = 3
 
 
 imu_sensor.IMUSensor.channels = [
@@ -35,7 +35,7 @@ imu_sensor.IMUSensor.upper_bound = [6.28318548203, 6.28318548203,
                                        6283.18554688, 6283.18554688]
 
 # We use the default confirugration for MotorAngleSensor, which reads limits from the robot.
-SENSORS = [@motor_angle_sensor.MotorAngleSensor(), @pupper_time_sensor.PeriodicSignalSensor()]
+SENSORS = [@imu_sensor.IMUSensor(), @motor_angle_sensor.MotorAngleSensor(), @pupper_time_sensor.PeriodicSignalSensor()]
 pupper_time_sensor.PeriodicSignalSensor.frequencies = [1]
 
 locomotion_gym_config.SimulationParameters.sim_time_step_s = %SIM_TIME_STEP
@@ -79,6 +79,6 @@ pupper_motor_model.PupperMotorModel.motor_torque_dependent_friction = 0.28 # [un
 pupper_motor_model.PupperMotorModel.torque_time_constant = 0.01
 
 pupper_v2.Pupper.sensors = %SENSORS    
-env_loader.load.wrapper_classes = [
-    @observation_dictionary_to_array_wrapper.ObservationDictionaryToArrayWrapper]    
+env_loader.load.wrapper_classes = []
+#    @observation_dictionary_to_array_wrapper.ObservationDictionaryToArrayWrapper]    
 

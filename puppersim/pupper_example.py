@@ -24,7 +24,7 @@ import time
 import gin
 import math
 import numpy as np
-
+import pickle
 from pybullet_envs.minitaur.envs_v2 import env_loader
 import pybullet as p
 import puppersim
@@ -35,7 +35,7 @@ import os
 flags.DEFINE_bool("render", True, "Whether to render the example.")
 flags.DEFINE_bool("profile", False, "Whether to print timing results for different parts of the code.")
 flags.DEFINE_bool("run_on_robot", False, "Whether to run on robot or in simulation.")
-
+flags.DEFINE_bool("log_to_file", False, "Whether to log data to the disk.")
 FLAGS = flags.FLAGS
 CONFIG_DIR = puppersim.getPupperSimPath()
 _NUM_STEPS = 100000
@@ -74,28 +74,46 @@ def run_example(num_max_steps=_NUM_STEPS):
   print("env.action_space=",env.action_space)
   obs = env.reset()
   last_control_step = time.time()
-  for i in range(num_max_steps):
-    delta_time = env.robot.GetTimeSinceReset()
-    # 1Hz signal
-    phase = delta_time * 2 * np.pi 
-    # joint angles corresponding to a standing position
-    action = np.array([0, 0.6,-1.2,0, 0.6,-1.2,0, 0.6,-1.2,0, 0.6,-1.2])
-    # modulate the default joint angles by a sinusoid to make the robot do pushups
-    action = (np.sin(phase) * 0.6 + 0.8) * action
-    # NOTE: We do not fix the loop rate so be careful if using a policy that is solely dependent on time
+  log_dict = {
+      't': [],
+      'IMU': [],
+      'MotorAngle': [],
+      'action': []
+  }
+  if FLAGS.log_to_file:
+    f = open("env_log.txt", "wb")
+  try:
+    for i in range(num_max_steps):
+      delta_time = env.robot.GetTimeSinceReset()
+      # 1Hz signal
+      phase = delta_time * 2 * np.pi 
+      # joint angles corresponding to a standing position
+      action = np.array([0, 0.6,-1.2,0, 0.6,-1.2,0, 0.6,-1.2,0, 0.6,-1.2])
+      # modulate the default joint angles by a sinusoid to make the robot do pushups
+      action[:3] = (np.sin(phase) * 0.6 + 0.8) * action[:3]
+      action[6:9] = (np.sin(phase) * 0.6 + 0.8) * action[6:9]
+      # NOTE: We do not fix the loop rate so be careful if using a policy that is solely dependent on time
 
-    before_step_timestamp = time.time()
-    obs, reward, done, _ = env.step(action)
-    after_step_timestamp = time.time()
-    if FLAGS.profile:
-      print("loop_dt: ", time.time() - last_control_step, "env.step(): ", after_step_timestamp - before_step_timestamp)
-    else:
-      print("obs: ", obs)
-      print("act: ", action)
-      print("time: ", delta_time)
+      before_step_timestamp = time.time()
+      obs, reward, done, _ = env.step(action)
+      after_step_timestamp = time.time()
+      log_dict['t'].append(delta_time)
+      log_dict['IMU'].append(obs['IMU'])
+      log_dict['MotorAngle'].append(obs['MotorAngle'])
+      log_dict['action'].append(action)
+      if FLAGS.profile:
+        print("loop_dt: ", time.time() - last_control_step, "env.step(): ", after_step_timestamp - before_step_timestamp)
+      else:
+        print("obs: ", obs)
+        print("act: ", action)
+        print("time: ", delta_time)
 
-    last_control_step = time.time()
-
+      last_control_step = time.time()
+  finally:
+    if FLAGS.log_to_file:
+      print("logging to file...")
+      pickle.dump(log_dict, f)
+      f.close()
 
 def main(_):
   _load_config(FLAGS.render)

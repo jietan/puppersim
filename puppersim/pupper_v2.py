@@ -87,7 +87,15 @@ class Pupper(quadruped_base.QuadrupedBase):
     KNEE_ANGLE=-1.2
     initial_joint_poses = [ABDUCTION_ANGLE,HIP_ANGLE,KNEE_ANGLE]*4
     return initial_joint_poses
-  
+
+  @property
+  def base_roll_pitch_yaw(self):
+    return [self._base_roll_pitch_yaw[1], -self._base_roll_pitch_yaw[0], self._base_roll_pitch_yaw[2]]
+
+  @property
+  def base_roll_pitch_yaw_rate(self):
+    return [self._base_roll_pitch_yaw_rate[1], -self._base_roll_pitch_yaw_rate[0], self._base_roll_pitch_yaw_rate[2]]
+
   @classmethod
   def get_constants(cls):
     del cls
