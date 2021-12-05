@@ -55,6 +55,7 @@ def main(argv):
   parser.add_argument('--run_on_robot', action='store_true', help='whether to run the policy on the robot instead of in simulation. Default is False.')
   parser.add_argument('--render', default=False, action='store_true', help='whether to render the robot. Default is False.')
   parser.add_argument('--profile', default=False, action='store_true', help='whether to print timing for parts of the code. Default is False.')
+  parser.add_argument('--plot', default=True, action='store_true', help='whether to plot action and observation histories after running the policy.')
   if len(argv):
     args = parser.parse_args(argv)
   else:
@@ -151,6 +152,13 @@ def main(argv):
   print('returns: ', returns)
   print('mean return: ', np.mean(returns))
   print('std of return: ', np.std(returns))
+
+  if args.plot and not args.run_on_robot:
+    import matplotlib.pyplot as plt
+    action_history = np.array(actions)
+    observation_history = np.array(observations)
+    plt.plot(action_history)
+    plt.show()
 
 if __name__ == '__main__':
   import sys

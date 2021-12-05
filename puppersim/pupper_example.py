@@ -68,9 +68,6 @@ def run_example(num_max_steps=_NUM_STEPS):
   # BUG: the motor limits defined by the robot override those of the motor model here
   # https://github.com/bulletphysics/bullet3/blob/48dc1c45da685c77d3642545c4851b05fb3a1e8b/examples/pybullet/gym/pybullet_envs/minitaur/robots/quadruped_base.py#L131
 
-  env._robot._motor_model._torque_lower_limits = -np.array([MAX_TORQUE]*12)
-  env._robot._motor_model._torque_upper_limits = np.array([MAX_TORQUE]*12)
-
   print("env.action_space=",env.action_space)
   obs = env.reset()
   last_control_step = time.time()

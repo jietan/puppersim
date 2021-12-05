@@ -17,6 +17,9 @@ class PupperRobot(quadruped_base.QuadrupedBase):
 
   def __init__(
       self,
+      kp=16.0,
+      kd=2.0,
+      max_current=7.0,
       **kwargs,
   ):
     """Constructs a Pupper robot interface.
@@ -35,7 +38,7 @@ class PupperRobot(quadruped_base.QuadrupedBase):
     serial_port = next(list_ports.grep(".*ttyACM0.*")).device
     self._hardware_interface = interface.Interface(serial_port)
     time.sleep(0.25)
-    self._hardware_interface.set_joint_space_parameters(kp=50.0, kd=5.0, max_current=7.0)
+    self._hardware_interface.set_joint_space_parameters(kp=kp, kd=kd, max_current=max_current)
     super().__init__(**kwargs)
     self._clock = time.time
 
