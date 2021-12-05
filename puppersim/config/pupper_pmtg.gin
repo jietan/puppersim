@@ -35,7 +35,7 @@ imu_sensor.IMUSensor.upper_bound = [6.28318548203, 6.28318548203,
                                        6283.18554688, 6283.18554688]
 
 # We use the default confirugration for MotorAngleSensor, which reads limits from the robot.
-SENSORS = [@imu_sensor.IMUSensor(), @motor_angle_sensor.MotorAngleSensor()]
+SENSORS = [@motor_angle_sensor.MotorAngleSensor()]
 locomotion_gym_config.SimulationParameters.sim_time_step_s = %SIM_TIME_STEP
 locomotion_gym_config.SimulationParameters.num_action_repeat = %NUM_ACTION_REPEAT
 locomotion_gym_config.SimulationParameters.enable_rendering = False
@@ -62,6 +62,11 @@ pupper_v2.Pupper.motor_model_class = @pupper_motor_model.PupperMotorModel
 locomotion_gym_env.LocomotionGymEnv.robot_class = @pupper_v2.Pupper
 
 # Specify the task.
+# Have to add LastAction sensor before using
+# pupper_locomotion_task.SimpleForwardTask.weight_action_accel = 0.01
+pupper_locomotion_task.SimpleForwardTask.clip_velocity = 0.0025 # No reward past 0.25 m/s
+pupper_locomotion_task.SimpleForwardTask.energy_penalty_coef = 0.0
+pupper_locomotion_task.SimpleForwardTask.torque_penalty_coef = 0.0001
 locomotion_gym_env.LocomotionGymEnv.task = @pupper_locomotion_task.SimpleForwardTask()
 pupper_locomotion_task.SimpleForwardTask.terminal_condition = @pupper_terminal_conditions.default_terminal_condition_for_pupper
 
