@@ -123,30 +123,32 @@ def main(argv):
     steps = 0
     start_time = env.robot.GetTimeSinceReset()
     current_time = start_time
-    last_loop = time.time()
-    while not done:
-      start_time_robot = current_time
-      start_time_wall = time.time()
-      before_policy = time.time()
-      action = policy.act(obs)
-      after_policy = time.time()
+    start_time_wall = time.time()
+    while not done or args.run_on_robot:
+      if time.time() - start_time_wall > 0.01:
+        if args.profile:
+          print("loop dt:", time.time() - start_time_wall)
+        start_time_robot = current_time
+        start_time_wall = time.time()
+        before_policy = time.time()
+        action = policy.act(obs)
+        after_policy = time.time()
 
-      if not args.run_on_robot:
-        observations.append(obs)
-        actions.append(action)
+        if not args.run_on_robot:
+          observations.append(obs)
+          actions.append(action)
 
-      obs, r, done, _ = env.step(action)
-      totalr += r
-      steps += 1
-      current_time = env.robot.GetTimeSinceReset()
-      expected_duration = current_time - start_time_robot
-      actual_duration = time.time() - start_time_wall
-      if not args.nosleep and actual_duration < expected_duration and not args.run_on_robot:
-        time.sleep(expected_duration - actual_duration)
-      if args.profile:
-        print('policy.act(obs): ', after_policy - before_policy)
-        print('wallclock_loop_dt: ', time.time() - last_loop)
-      last_loop = time.time()
+        obs, r, done, _ = env.step(action)
+        totalr += r
+        steps += 1
+        current_time = env.robot.GetTimeSinceReset()
+        expected_duration = current_time - start_time_robot
+        actual_duration = time.time() - start_time_wall
+        if not args.nosleep and actual_duration < expected_duration and not args.run_on_robot:
+          time.sleep(expected_duration - actual_duration)
+        if args.profile:
+          print('policy.act(obs): ', after_policy - before_policy)
+          print('wallclock_control_code: ', time.time() - start_time_wall)
     returns.append(totalr)
 
   print('returns: ', returns)
