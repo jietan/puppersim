@@ -19,7 +19,7 @@ import pybullet_envs.minitaur.robots.robot_config
 UPPER_BOUND = 6.28318548203
 LOWER_BOUND = -6.28318548203
 SIM_TIME_STEP = 0.001
-NUM_ACTION_REPEAT = 28
+NUM_ACTION_REPEAT = 3
 
 
 imu_sensor.IMUSensor.channels = [
@@ -35,7 +35,7 @@ imu_sensor.IMUSensor.upper_bound = [6.28318548203, 6.28318548203,
                                        6283.18554688, 6283.18554688]
 
 # We use the default confirugration for MotorAngleSensor, which reads limits from the robot.
-SENSORS = [@motor_angle_sensor.MotorAngleSensor(), @pupper_time_sensor.PeriodicSignalSensor()]
+SENSORS = [@imu_sensor.IMUSensor(), @motor_angle_sensor.MotorAngleSensor()]
 pupper_time_sensor.PeriodicSignalSensor.frequencies = [1]
 
 locomotion_gym_config.SimulationParameters.sim_time_step_s = %SIM_TIME_STEP
@@ -52,8 +52,8 @@ locomotion_gym_env.LocomotionGymEnv.scene = @simple_scene.SimpleScene()
 robot_config.MotorLimits.angle_lower_limits = %pupper_constants.MOTOR_ACTION_LOWER_LIMIT
 robot_config.MotorLimits.angle_upper_limits = %pupper_constants.MOTOR_ACTION_UPPER_LIMIT
 
-robot_config.MotorLimits.torque_lower_limits = 0 # BUG: has no effect
-robot_config.MotorLimits.torque_upper_limits = 0 # BUG: has no effect
+robot_config.MotorLimits.torque_lower_limits = -1.7 # [Nm]
+robot_config.MotorLimits.torque_upper_limits = 1.7 # [Nm]
 
 pupper_v2.Pupper.motor_limits = @robot_config.MotorLimits()
 pupper_v2.Pupper.motor_control_mode = %robot_config.MotorControlMode.POSITION
@@ -67,18 +67,13 @@ pupper_locomotion_task.SimpleForwardTask.terminal_condition = @pupper_terminal_c
 # Specify the motor model parameters. Notice that we don't need to specify the control mode or motor limits here.
 pupper_motor_model.PupperMotorModel.kp = 4.0 # [Nm/rad]
 pupper_motor_model.PupperMotorModel.kd = 0.4 # [Nm/(rad/s)]
-pupper_motor_model.PupperMotorModel.torque_lower_limits = -0.1 # BUG: no effect
-pupper_motor_model.PupperMotorModel.torque_upper_limits = 0.1 # BUG: no effect
 
 pupper_motor_model.PupperMotorModel.sampling_time = %SIM_TIME_STEP
 pupper_motor_model.PupperMotorModel.velocity_filter_time_constant = 0.01 # [s]
 pupper_motor_model.PupperMotorModel.motor_damping = 0.0045 # [Nm/(rad/s)]
 pupper_motor_model.PupperMotorModel.motor_torque_dependent_friction = 0.28 # [unitless]
 
-# BUG: not used because it introduces instability
-pupper_motor_model.PupperMotorModel.torque_time_constant = 0.01
-
 pupper_v2.Pupper.sensors = %SENSORS    
-env_loader.load.wrapper_classes = [
-    @observation_dictionary_to_array_wrapper.ObservationDictionaryToArrayWrapper]    
+env_loader.load.wrapper_classes = []
+#    @observation_dictionary_to_array_wrapper.ObservationDictionaryToArrayWrapper]    
 
