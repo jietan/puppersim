@@ -108,6 +108,7 @@ class Worker(object):
         steps = 0
 
         ob = self.env.reset()
+        print(self.env.desired_velocity)
         for i in range(rollout_length):
             action = self.policy.act(ob)
             ob, reward, done, _ = self.env.step(action)

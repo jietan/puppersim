@@ -18,10 +18,10 @@ class SimpleForwardTask(task_interface.Task):
   """A basic "move forward" task."""
 
   def __init__(self,
-               weight=1.0,
+               weight=0.1,
                terminal_condition=terminal_conditions
                .default_terminal_condition_for_minitaur,
-               divide_with_dt=False,
+               divide_with_dt=True,
                clip_velocity=None,
                energy_penalty_coef=0.0,
                min_com_height=None,
@@ -105,10 +105,13 @@ class SimpleForwardTask(task_interface.Task):
       action_acceleration_penalty = (
           float(self._weight_action_accel) * np.mean(np.abs(acc)))
 
-    c = 20
-    desired_velocity = 10
-    reward = c - (desired_velocity-velocity)/velocity
-    reward -= action_acceleration_penalty
+    # c = 20
+    desired_velocity = env.desired_velocity
+    # desired_velocity = 0.34
+    # reward = c - (desired_velocity-velocity)/velocity
+    # reward -= action_acceleration_penalty
+
+    reward = -abs(desired_velocity-velocity)/desired_velocity
 
     # Energy
     if self._energy_penalty_coef > 0:
@@ -117,6 +120,15 @@ class SimpleForwardTask(task_interface.Task):
           self._env.sim_time_step, self._env.num_action_repeat)
       # reward += energy_reward * self._energy_penalty_coef
 
+    self._torque_penalty_coef = 0.01
+
+    if self._torque_penalty_coef > 0:
+      torque_reward = -self._torque_penalty_coef * np.dot(
+          self._env.robot.motor_torques, self._env.robot.motor_torques)
+      reward += torque_reward
+
+    # print("Reward.", "Timestamp:", round(env.robot.GetTimeSinceReset(), 3),
+    #       "Velocity:", round(velocity, 4), "Torque:", round(torque_reward, 4))
     return reward * self._weight
 
   def done(self, env):
