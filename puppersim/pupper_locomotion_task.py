@@ -24,6 +24,7 @@ class SimpleForwardTask(task_interface.Task):
                divide_with_dt=True,
                clip_velocity=None,
                energy_penalty_coef=0.0,
+               torque_penalty_coef=0.0,
                min_com_height=None,
                weight_action_accel=None):
     """Initializes the task.
@@ -53,6 +54,7 @@ class SimpleForwardTask(task_interface.Task):
     self._action_history_sensor = None
     self._min_com_height = min_com_height
     self._energy_penalty_coef = energy_penalty_coef
+    self._torque_penalty_coef = torque_penalty_coef
     self._env = None
     self._step_count = 0
     if energy_penalty_coef < 0:
@@ -120,8 +122,11 @@ class SimpleForwardTask(task_interface.Task):
           self._env.sim_time_step, self._env.num_action_repeat)
       # reward += energy_reward * self._energy_penalty_coef
 
+<<<<<<< HEAD
     self._torque_penalty_coef = 0.01
 
+=======
+>>>>>>> 9d148ff37d68619f09bd5d893a35f0a3aaf88eef
     if self._torque_penalty_coef > 0:
       torque_reward = -self._torque_penalty_coef * np.dot(
           self._env.robot.motor_torques, self._env.robot.motor_torques)

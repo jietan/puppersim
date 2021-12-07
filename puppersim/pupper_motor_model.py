@@ -274,21 +274,18 @@ class PupperMotorModel(object):
     # motor_torques = self._torque_filter(motor_torques)
 
     # Hard-code torque limits until the torque limit bug is fixed
-    motor_torques = np.clip(motor_torques, -1.7, 1.7)
+    if (self._torque_lower_limits is not None or
+        self._torque_upper_limits is not None):
+      motor_torques = np.clip(motor_torques, self._torque_lower_limits,
+                              self._torque_upper_limits)
+    # Rescale and clip the motor torques as needed.
+    motor_torques = self._strength_ratios * motor_torques
 
     # Apply motor damping and friction
     motor_torques -= (np.sign(self._previous_true_motor_velocity) *
                       self._motor_torque_dependent_friction *
                       motor_torques)
     motor_torques -= self._previous_true_motor_velocity * self._motor_damping
-
-    # Rescale and clip the motor torques as needed.
-    motor_torques = self._strength_ratios * motor_torques
-    if (self._torque_lower_limits is not None or
-        self._torque_upper_limits is not None):
-      motor_torques = np.clip(motor_torques, self._torque_lower_limits,
-                              self._torque_upper_limits)
-
     return motor_torques, motor_torques
 
   def get_motor_states(self, latency=None):
