@@ -12,11 +12,11 @@ from pybullet_envs.minitaur.envs_v2.tasks import terminal_conditions
 from pybullet_envs.minitaur.envs_v2.utilities import env_utils_v2 as env_utils
 
 
-_PENALTY_FOR_EARLY_TERMINATION = -10
+_PENALTY_FOR_EARLY_TERMINATION = 0
 _TARGET_SPEED_LOWER_BOUND = 0.0  # meters per simulation step
-_TARGET_SPEED_UPPER_BOUND = 0.1  # meters per simulation step
+_TARGET_SPEED_UPPER_BOUND = 0.4  # meters per simulation step
 # Tolerance for speed vs target speed in reward.
-_GAUSSIAN_CAP_DEVIATION = 0.0008
+_GAUSSIAN_CAP_DEVIATION = 0.03
 # The size of the queue used to calculate average speed for rewarding.
 _DEQUE_SIZE = 10
 
@@ -48,8 +48,8 @@ class SpeedRewardTask(sensor.BoxSpaceSensor):
         between these data points.
     """
     self._terminal_condition = terminal_condition
-    self._last_front_vectors = collections.deque([], maxlen=_DEQUE_SIZE)
-    self._last_base_positions = collections.deque([], maxlen=_DEQUE_SIZE)
+    self._last_front_vectors = []
+    self._last_base_positions = []
     self._target_speed = 0.0
     self._num_step = 0
     self._min_com_height = min_com_height
@@ -58,6 +58,7 @@ class SpeedRewardTask(sensor.BoxSpaceSensor):
       raise ValueError('Energy Penalty Coefficient should be >= 0')
     self._target_speed_at_reset = 0.0
     self._multiply_with_dt = multiply_with_dt
+    np.random.seed(0)
 
     super(SpeedRewardTask, self).__init__(
         name='Speed goal sensor',
@@ -86,12 +87,13 @@ class SpeedRewardTask(sensor.BoxSpaceSensor):
     Args:
       env: gym environment.
     """
-    self._target_speed = (np.random.rand() - 0.5)
+    self._target_speed = np.random.rand() * (_TARGET_SPEED_UPPER_BOUND - _TARGET_SPEED_LOWER_BOUND) + _TARGET_SPEED_LOWER_BOUND
+    print("target_speed", self._target_speed)
     self._env = env
     self._target_speed_coef = 0.0
     self._num_step = 0
-    self._last_front_vectors = collections.deque([], maxlen=_DEQUE_SIZE)
-    self._last_base_positions = collections.deque([], maxlen=_DEQUE_SIZE)
+    self._last_front_vectors = [] # collections.deque([], maxlen=_DEQUE_SIZE)
+    self._last_base_positions = [] # collections.deque([], maxlen=_DEQUE_SIZE)
     self._last_front_vectors.append(
         self._get_robot_front_direction_on_xy_plane())
     self._last_base_positions.append(self._env.robot.base_position)
@@ -151,12 +153,13 @@ class SpeedRewardTask(sensor.BoxSpaceSensor):
     # current position divided by number of steps in between.
     current_base_position = self._env.robot.base_position
     old_position = self._last_base_positions[0]
-    steps = len(self._last_base_positions)
+    steps = self._env.get_time_since_reset()
     average_speed = [(current_base_position[0] - old_position[0]) / steps,
                      (current_base_position[1] - old_position[1]) / steps, 0]
     # Use the oldest front vector to calculate the speed projected to the front
     # direction of the robot recorded a while ago (up to 50 steps).
     projected_speed = np.dot(average_speed, self._last_front_vectors[0])
+    # print(steps, self._env.robot.base_position, old_position, projected_speed, average_speed)
     forward_reward = math.exp(-(projected_speed - self._target_speed)**2 /
                               (2 * _GAUSSIAN_CAP_DEVIATION**2))
     return forward_reward
@@ -170,7 +173,8 @@ class SpeedRewardTask(sensor.BoxSpaceSensor):
     current_base_orientation = self._env.robot.base_orientation_quaternion
     rot_matrix = self._env.pybullet_client.getMatrixFromQuaternion(
         current_base_orientation)
-    return [rot_matrix[0], rot_matrix[1], 0]
+    return [0, -1, 0]
+    # return [rot_matrix[0], rot_matrix[1], 0]
 
   def done(self, env):
     """Checks if the episode should be finished or not."""
