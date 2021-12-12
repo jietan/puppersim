@@ -1,0 +1,97 @@
+import pybullet_envs.minitaur.envs_v2.env_wrappers.pmtg_wrapper_env
+import pybullet_envs.minitaur.envs_v2.env_wrappers.observation_dictionary_to_array_wrapper
+import pybullet_envs.minitaur.envs_v2.locomotion_gym_config
+import pybullet_envs.minitaur.envs_v2.locomotion_gym_env
+import pybullet_envs.minitaur.envs_v2.scenes.scene_base
+import pybullet_envs.minitaur.envs_v2.scenes.simple_scene
+import pybullet_envs.minitaur.envs_v2.sensors.imu_sensor
+import pybullet_envs.minitaur.envs_v2.sensors.motor_angle_sensor
+
+import puppersim.pupper_motor_model
+import puppersim.pupper_constants
+import puppersim.pupper_locomotion_task
+import puppersim.pupper_terminal_conditions
+import puppersim.pupper_randomized_ground
+
+import puppersim.pupper_v2
+import pybullet_envs.minitaur.robots.robot_config
+
+
+UPPER_BOUND = 6.28318548203
+LOWER_BOUND = -6.28318548203
+SIM_TIME_STEP = 0.001
+NUM_ACTION_REPEAT = 10
+
+imu_sensor.IMUSensor.channels = [
+    %imu_sensor.IMUChannel.ROLL,
+    %imu_sensor.IMUChannel.PITCH,
+    %imu_sensor.IMUChannel.ROLL_RATE,
+    %imu_sensor.IMUChannel.PITCH_RATE,
+]
+
+imu_sensor.IMUSensor.lower_bound = [-6.28318548203, -6.28318548203,
+                                       -6283.18554688, -6283.18554688]
+imu_sensor.IMUSensor.upper_bound = [6.28318548203, 6.28318548203,
+                                       6283.18554688, 6283.18554688]
+
+# We use the default confirugration for MotorAngleSensor, which reads limits from the robot.
+# SENSORS = [@imu_sensor.IMUSensor(), @motor_angle_sensor.MotorAngleSensor()]
+SENSORS = [@motor_angle_sensor.MotorAngleSensor()]
+locomotion_gym_config.SimulationParameters.sim_time_step_s = %SIM_TIME_STEP
+locomotion_gym_config.SimulationParameters.num_action_repeat = %NUM_ACTION_REPEAT
+locomotion_gym_config.SimulationParameters.enable_rendering = False
+locomotion_gym_config.LocomotionGymConfig.simulation_parameters = @locomotion_gym_config.SimulationParameters()
+locomotion_gym_env.LocomotionGymEnv.gym_config = @locomotion_gym_config.LocomotionGymConfig()
+
+# Specify the scene.
+
+# locomotion_gym_env.LocomotionGymEnv.scene = @simple_scene.SimpleScene()
+locomotion_gym_env.LocomotionGymEnv.scene = @pupper_randomized_ground.BumpyScene()
+pupper_randomized_ground.BumpyScene.lateral_friction=1.8
+pupper_randomized_ground.BumpyScene.height_perturbation_range=0.03
+
+
+# Specify the motor limits, and motor control mode.
+robot_config.MotorLimits.angle_lower_limits = %pupper_constants.MOTOR_ACTION_LOWER_LIMIT
+robot_config.MotorLimits.angle_upper_limits = %pupper_constants.MOTOR_ACTION_UPPER_LIMIT
+robot_config.MotorLimits.torque_lower_limits = -1.7 # [Nm]
+robot_config.MotorLimits.torque_upper_limits = 1.7 # [Nm]
+
+pupper_v2.Pupper.motor_limits = @robot_config.MotorLimits()
+pupper_v2.Pupper.motor_control_mode = %robot_config.MotorControlMode.POSITION
+pupper_v2.Pupper.motor_model_class = @pupper_motor_model.PupperMotorModel
+locomotion_gym_env.LocomotionGymEnv.robot_class = @pupper_v2.Pupper
+
+# Specify the task.
+# Have to add LastAction sensor before using
+# pupper_locomotion_task.SimpleForwardTask.weight_action_accel = 0.01
+pupper_locomotion_task.SimpleForwardTask.clip_velocity = 0.0025 # No reward past 0.25 m/s
+pupper_locomotion_task.SimpleForwardTask.energy_penalty_coef = 0.0
+pupper_locomotion_task.SimpleForwardTask.torque_penalty_coef = 0.0001
+locomotion_gym_env.LocomotionGymEnv.task = @pupper_locomotion_task.SimpleForwardTask()
+pupper_locomotion_task.SimpleForwardTask.terminal_condition = @pupper_terminal_conditions.default_terminal_condition_for_pupper
+
+# Specify the motor model parameters. Notice that we don't need to specify the control mode or motor limits here.
+pupper_motor_model.PupperMotorModel.kp = 4.0 # [Nm/rad]
+pupper_motor_model.PupperMotorModel.kd = 0.4 # [Nm/(rad/s)]
+
+pupper_motor_model.PupperMotorModel.sampling_time = %SIM_TIME_STEP
+pupper_motor_model.PupperMotorModel.velocity_filter_time_constant = 0.01 # [s]
+pupper_motor_model.PupperMotorModel.motor_damping = 0.0045 # [Nm/(rad/s)]
+pupper_motor_model.PupperMotorModel.motor_torque_dependent_friction = 0.28 # [unitless]
+
+pupper_v2.Pupper.sensors = %SENSORS
+
+pmtg_wrapper_env.PmtgWrapperEnv.action_filter_enable = True
+pmtg_wrapper_env.PmtgWrapperEnv.intensity_upper_bound = 1.0
+pmtg_wrapper_env.PmtgWrapperEnv.max_delta_time = 4.0
+pmtg_wrapper_env.PmtgWrapperEnv.min_delta_time = 2.0
+pmtg_wrapper_env.PmtgWrapperEnv.residual_range = 0.5
+pmtg_wrapper_env.PmtgWrapperEnv.integrator_coupling_mode = "all coupled"
+pmtg_wrapper_env.PmtgWrapperEnv.walk_height_coupling_mode = "all coupled"
+pmtg_wrapper_env.PmtgWrapperEnv.variable_swing_stance_ratio = 1
+pmtg_wrapper_env.PmtgWrapperEnv.init_gait = "trot"
+
+env_loader.load.wrapper_classes = [
+    @pmtg_wrapper_env.PmtgWrapperEnv,
+    @observation_dictionary_to_array_wrapper.ObservationDictionaryToArrayWrapper]    
