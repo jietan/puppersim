@@ -49,7 +49,7 @@ locomotion_gym_env.LocomotionGymEnv.gym_config = @locomotion_gym_config.Locomoti
 # robot_urdf_loader.RobotUrdfLoader.init_base_position = (0,0, 1.0)
 
 # locomotion_gym_env.LocomotionGymEnv.scene = None
-locomotion_gym_env.LocomotionGymEnv.scene = @pupper_randomized_ground.BumpyScene()
+locomotion_gym_env.LocomotionGymEnv.scene = @simple_scene.SimpleScene() #@pupper_randomized_ground.BumpyScene()
 
 pupper_randomized_ground.BumpyScene.lateral_friction=1.8
 pupper_randomized_ground.BumpyScene.height_perturbation_range=0.03
@@ -69,6 +69,7 @@ locomotion_gym_env.LocomotionGymEnv.robot_class = @pupper_v2.Pupper
 # Specify the task.
 # Have to add LastAction sensor before using
 # pupper_locomotion_task.SimpleForwardTask.weight_action_accel = 0.01
+
 # pupper_locomotion_task.SimpleForwardTask.clip_velocity = 0.0025 # No reward past 0.25 m/s
 # pupper_locomotion_task.SimpleForwardTask.energy_penalty_coef = 0.0
 # pupper_locomotion_task.SimpleForwardTask.torque_penalty_coef = 0.0001
@@ -77,6 +78,7 @@ locomotion_gym_env.LocomotionGymEnv.robot_class = @pupper_v2.Pupper
 
 
 speed_task.SpeedRewardTask.min_com_height = 0.0
+speed_task.SpeedRewardTask.terminal_condition = @pupper_terminal_conditions.default_terminal_condition_for_pupper
 locomotion_gym_env.LocomotionGymEnv.task = @speed_task.SpeedRewardTask()
 
 # Specify the motor model parameters. Notice that we don't need to specify the control mode or motor limits here.
