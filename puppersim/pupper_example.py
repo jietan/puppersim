@@ -100,10 +100,6 @@ def run_example(num_max_steps=_NUM_STEPS):
       log_dict['action'].append(action)
       if FLAGS.profile:
         print("loop_dt: ", time.time() - last_control_step, "env.step(): ", after_step_timestamp - before_step_timestamp)
-      else:
-        print("obs: ", obs)
-        print("act: ", action)
-        print("time: ", delta_time)
 
       last_control_step = time.time()
   finally:

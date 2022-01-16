@@ -49,13 +49,13 @@ robot_config.MotorLimits.angle_upper_limits = %pupper_constants.MOTOR_ACTION_UPP
 robot_config.MotorLimits.torque_lower_limits = -1.7
 robot_config.MotorLimits.torque_upper_limits = 1.7
 
-pupper_robot_v2.PupperRobot.kp = 16.0 # [A/rad]
-pupper_robot_v2.PupperRobot.kp = 2.0 # [A/(rad/s)]
-pupper_robot_v2.PupperRobot.max_current = 7.0 # [A]
+#pupper_robot_v2.PupperRobot.kp = 16.0 # [A/rad]
+#pupper_robot_v2.PupperRobot.kp = 2.0 # [A/(rad/s)]
+#pupper_robot_v2.PupperRobot.max_current = 7.0 # [A]
 pupper_robot_v2.PupperRobot.motor_limits = @robot_config.MotorLimits()
 pupper_robot_v2.PupperRobot.motor_control_mode = %robot_config.MotorControlMode.POSITION
-pupper_robot_v2.PupperRobot.motor_model_class = @pupper_motor_model.PupperMotorModel
-locomotion_gym_env.LocomotionGymEnv.robot_class = @pupper_v2.Pupper
+#pupper_robot_v2.PupperRobot.motor_model_class = @pupper_motor_model.PupperMotorModel
+locomotion_gym_env.LocomotionGymEnv.robot_class = @pupper_robot_v2.PupperRobot
 
 # Specify the task.
 locomotion_gym_env.LocomotionGymEnv.task = @pupper_locomotion_task.SimpleForwardTask()
@@ -69,4 +69,4 @@ pupper_motor_model.PupperMotorModel.velocity_filter_time_constant = 0.01 # [s]
 pupper_motor_model.PupperMotorModel.motor_damping = 0.0045 # [Nm/(rad/s)]
 pupper_motor_model.PupperMotorModel.motor_torque_dependent_friction = 0.28 # [unitless]
 
-pupper_v2.Pupper.sensors = %SENSORS
+pupper_robot_v2.PupperRobot.sensors = %SENSORS
