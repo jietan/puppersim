@@ -83,12 +83,12 @@ def run_example(num_max_steps=_NUM_STEPS):
     for i in range(num_max_steps):
       delta_time = env.robot.GetTimeSinceReset()
       # 1Hz signal
-      phase = delta_time * 2 * np.pi 
+      phase = delta_time * 1 * np.pi 
       # joint angles corresponding to a standing position
       action = np.array([0, 0.6,-1.2,0, 0.6,-1.2,0, 0.6,-1.2,0, 0.6,-1.2])
       # modulate the default joint angles by a sinusoid to make the robot do pushups
       action[:3] = (np.sin(phase) * 0.6 + 0.8) * action[:3]
-      action[6:9] = (np.sin(phase) * 0.6 + 0.8) * action[6:9]
+      action[9:] = (np.sin(phase) * 0.6 + 0.8) * action[9:]
       # NOTE: We do not fix the loop rate so be careful if using a policy that is solely dependent on time
 
       before_step_timestamp = time.time()
