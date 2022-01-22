@@ -36,7 +36,7 @@ imu_sensor.IMUSensor.upper_bound = [6.28318548203, 6.28318548203,
                                        6283.18554688, 6283.18554688]
 
 # We use the default confirugration for MotorAngleSensor, which reads limits from the robot.
-SENSORS = [@motor_angle_sensor.MotorAngleSensor()]
+SENSORS = [@motor_angle_sensor.MotorAngleSensor(), @imu_sensor.IMUSensor()]
 locomotion_gym_config.SimulationParameters.sim_time_step_s = %SIM_TIME_STEP
 locomotion_gym_config.SimulationParameters.num_action_repeat = %NUM_ACTION_REPEAT
 locomotion_gym_config.SimulationParameters.enable_rendering = False
