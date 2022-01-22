@@ -58,7 +58,7 @@ def main(argv):
   parser.add_argument('--run_on_robot', action='store_true', help='whether to run the policy on the robot instead of in simulation. Default is False.')
   parser.add_argument('--render', default=False, action='store_true', help='whether to render the robot. Default is False.')
   parser.add_argument('--profile', default=False, action='store_true', help='whether to print timing for parts of the code. Default is False.')
-  parser.add_argument('--plot', default=True, action='store_true', help='whether to plot action and observation histories after running the policy.')
+  parser.add_argument('--plot', default=False, action='store_true', help='whether to plot action and observation histories after running the policy.')
   parser.add_argument("--log_to_file", default=False, action='store_true', help="Whether to log data to the disk.")
   if len(argv):
     args = parser.parse_args(argv)
@@ -162,10 +162,8 @@ def main(argv):
   finally:
     if args.log_to_file:
       print("logging to file...")
-      print(log_dict)
       with open("env_ars_log.txt", "wb") as f:
         pickle.dump(log_dict, f)
-#      f.close()
 
   print('returns: ', returns)
   print('mean return: ', np.mean(returns))
