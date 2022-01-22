@@ -126,8 +126,7 @@ def main(argv):
       'MotorAngle': [],
       'action': []
   }
-  try:#for i in range(args.num_rollouts):
-#    print('iter', i)
+  try: #for i in range(args.num_rollouts):
     obs = env.reset()
     done = False
     totalr = 0.
@@ -147,11 +146,11 @@ def main(argv):
           actions.append(action)
 
         obs, r, done, _ = env.step(action)
-#        import pdb; pdb.set_trace()
-        log_dict['t'].append(env.robot.GetTimeSinceReset())
-        log_dict['MotorAngle'].append(obs[0:12])
-        log_dict['IMU'].append(obs[12:16])
-        log_dict['action'].append(action)
+        if args.log_to_file:
+          log_dict['t'].append(env.robot.GetTimeSinceReset())
+          log_dict['MotorAngle'].append(obs[0:12])
+          log_dict['IMU'].append(obs[12:16])
+          log_dict['action'].append(action)
 
         totalr += r
         steps += 1

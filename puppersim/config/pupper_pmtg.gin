@@ -48,8 +48,8 @@ locomotion_gym_env.LocomotionGymEnv.gym_config = @locomotion_gym_config.Locomoti
 # robot_urdf_loader.RobotUrdfLoader.constrained_base = True
 # robot_urdf_loader.RobotUrdfLoader.init_base_position = (0,0, 1.0)
 
-#locomotion_gym_env.LocomotionGymEnv.scene = @simple_scene.SimpleScene()
-locomotion_gym_env.LocomotionGymEnv.scene = @pupper_randomized_ground.BumpyScene()
+locomotion_gym_env.LocomotionGymEnv.scene = @simple_scene.SimpleScene()
+#locomotion_gym_env.LocomotionGymEnv.scene = @pupper_randomized_ground.BumpyScene()
 
 pupper_randomized_ground.BumpyScene.lateral_friction=1.8
 pupper_randomized_ground.BumpyScene.height_perturbation_range=0.03
