@@ -1,0 +1,115 @@
+
+import pybullet_envs.minitaur.envs_v2.env_wrappers.observation_dictionary_to_array_wrapper
+import pybullet_envs.minitaur.envs_v2.locomotion_gym_config
+import pybullet_envs.minitaur.envs_v2.locomotion_gym_env
+import pybullet_envs.minitaur.envs_v2.scenes.scene_base
+import pybullet_envs.minitaur.envs_v2.scenes.simple_scene
+
+import pybullet_envs.minitaur.envs_v2.sensors.imu_sensor
+import pybullet_envs.minitaur.envs_v2.sensors.motor_angle_sensor
+import pybullet_envs.minitaur.envs_v2.sensors.accelerometer_sensor
+import pybullet_envs.minitaur.envs_v2.sensors.toe_position_sensor
+import pybullet_envs.minitaur.envs_v2.sensors.last_action_sensor
+import motor_velocity_sensor
+import puppersim.pupper_time_sensor
+
+import puppersim.pupper_motor_model
+import puppersim.pupper_constants
+import puppersim.pupper_locomotion_task
+import puppersim.pupper_terminal_conditions
+import puppersim.pupper_randomized_ground
+
+import puppersim.pupper_v2
+import pybullet_envs.minitaur.robots.robot_config
+
+
+UPPER_BOUND = 6.28318548203
+LOWER_BOUND = -6.28318548203
+SIM_TIME_STEP = 0.001
+NUM_ACTION_REPEAT = 10
+
+imu_sensor.IMUSensor.channels = [
+    %imu_sensor.IMUChannel.ROLL,
+    %imu_sensor.IMUChannel.PITCH,
+    %imu_sensor.IMUChannel.YAW,
+    %imu_sensor.IMUChannel.ROLL_RATE,
+    %imu_sensor.IMUChannel.PITCH_RATE,
+    %imu_sensor.IMUChannel.YAW_RATE,
+]
+
+imu_sensor.IMUSensor.lower_bound = [-6.28318548203, -6.28318548203,
+                                       -6.28318548203, -6283.18554688, -6283.18554688, -6283.18554688]
+imu_sensor.IMUSensor.upper_bound = [6.28318548203, 6.28318548203,
+                                     6.28318548203, 6283.18554688, 6283.18554688, 6283.18554688]
+
+# We use the default confirugration for MotorAngleSensor, which reads limits from the robot.
+SENSORS = [@motor_angle_sensor.MotorAngleSensor(),
+           @accelerometer_sensor.AccelerometerSensor(),
+           @toe_position_sensor.ToePositionSensor(),
+           @puppersim.pupper_time_sensor.PeriodicSignalSensor(),
+           @imu_sensor.IMUSensor(),
+           @motor_velocity_sensor.MotorVelocitySensor(),
+          ]
+pupper_time_sensor.PeriodicSignalSensor.frequencies = [1]
+
+locomotion_gym_config.SimulationParameters.sim_time_step_s = %SIM_TIME_STEP
+locomotion_gym_config.SimulationParameters.num_action_repeat = %NUM_ACTION_REPEAT
+locomotion_gym_config.SimulationParameters.camera_distance = .5
+locomotion_gym_config.SimulationParameters.camera_yaw = -65
+locomotion_gym_config.SimulationParameters.render_width = 84
+locomotion_gym_config.SimulationParameters.render_height = 84
+locomotion_gym_config.SimulationParameters.camera_pitch = -10
+#locomotion_gym_config.SimulationParameters.egl_rendering = True
+locomotion_gym_config.SimulationParameters.enable_rendering = False
+locomotion_gym_config.LocomotionGymConfig.simulation_parameters = @locomotion_gym_config.SimulationParameters()
+locomotion_gym_env.LocomotionGymEnv.gym_config = @locomotion_gym_config.LocomotionGymConfig()
+
+# Specify the scene.
+
+#locomotion_gym_env.LocomotionGymEnv.scene = @simple_scene.SimpleScene()
+locomotion_gym_env.LocomotionGymEnv.scene = @pupper_randomized_ground.BumpyScene()
+pupper_randomized_ground.BumpyScene.lateral_friction=1.8
+pupper_randomized_ground.BumpyScene.height_perturbation_range=0.03
+
+robot_config.MotorLimits.angle_lower_limits = %pupper_constants.MOTOR_ACTION_LOWER_LIMIT
+robot_config.MotorLimits.angle_upper_limits = %pupper_constants.MOTOR_ACTION_UPPER_LIMIT
+robot_config.MotorLimits.torque_lower_limits = -1.7
+robot_config.MotorLimits.torque_upper_limits = 1.7
+pupper_v2.Pupper.motor_limits = @robot_config.MotorLimits()
+pupper_v2.Pupper.motor_control_mode = %robot_config.MotorControlMode.POSITION
+pupper_v2.Pupper.motor_model_class = @pupper_motor_model.PupperMotorModel
+locomotion_gym_env.LocomotionGymEnv.robot_class = @pupper_v2.Pupper
+
+# Specify the motor model parameters. Notice that we don't need to specify the control mode or motor limits here.
+pupper_motor_model.PupperMotorModel.kp = 4.0 # [Nm/rad]
+pupper_motor_model.PupperMotorModel.kd = 0.4 # [Nm/(rad/s)]
+
+pupper_motor_model.PupperMotorModel.sampling_time = %SIM_TIME_STEP
+pupper_motor_model.PupperMotorModel.velocity_filter_time_constant = 0.01 # [s]
+pupper_motor_model.PupperMotorModel.motor_damping = 0.0045 # [Nm/(rad/s)]
+pupper_motor_model.PupperMotorModel.motor_torque_dependent_friction = 0.28 # [unitless]
+
+# Specify the task.
+locomotion_gym_env.LocomotionGymEnv.task = @pupper_locomotion_task.SimpleForwardTask()
+pupper_locomotion_task.SimpleForwardTask.terminal_condition = @pupper_terminal_conditions.default_terminal_condition_for_pupper
+
+# Specify the motor model parameters. Notice that we don't need to specify the control mode or motor limits here.
+pupper_motor_model.PupperMotorModel.kp = 4.0 # [Nm/rad]
+pupper_motor_model.PupperMotorModel.kd = 0.4 # [Nm/(rad/s)]
+pupper_motor_model.PupperMotorModel.sampling_time = %SIM_TIME_STEP
+pupper_motor_model.PupperMotorModel.velocity_filter_time_constant = 0.01 # [s]
+pupper_motor_model.PupperMotorModel.motor_damping = 0.0045 # [Nm/(rad/s)]
+pupper_motor_model.PupperMotorModel.motor_torque_dependent_friction = 0.28 # [unitless]
+
+# Specify the task.
+locomotion_gym_env.LocomotionGymEnv.task = @pupper_locomotion_task.SimpleForwardTask()
+pupper_locomotion_task.SimpleForwardTask.terminal_condition = @pupper_terminal_conditions.default_terminal_condition_for_pupper
+pupper_locomotion_task.SimpleForwardTask.energy_penalty_coef = 1e-4
+pupper_locomotion_task.SimpleForwardTask.clip_velocity = .0025
+
+pupper_v2.Pupper.sensors = %SENSORS
+
+
+env_loader.load.wrapper_classes = [
+    @observation_dictionary_to_array_wrapper.ObservationDictionaryToArrayWrapper]
+    
