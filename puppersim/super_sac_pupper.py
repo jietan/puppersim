@@ -1,3 +1,19 @@
+"""
+Setup:
+git clone git@github.com:jakegrigsby/super_sac.git
+cd super_sac
+pip install -e .
+
+Training:
+python super_sac_pupper.py --config super_sac_configs/basic_online.gin --name your_run_name
+
+Switch between gin configs in super_sac_configs for different training setups.
+basic_online is standard FF SAC, lstm uses frame stacking to create a sequence for an lstm
+encoder, and from_pixels switches the env to image-based observations with a CNN encoder.
+
+Logging information and agent params are saved to ./saves/. That location can be changed
+with the SSAC_SAVE env variable (export SSAC_SAVE=/somewhere/with/more/disk/space)
+"""
 import argparse
 import os
 import gym
