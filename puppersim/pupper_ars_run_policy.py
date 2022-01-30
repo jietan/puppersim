@@ -22,11 +22,15 @@ import os
 #temp hack to create an envs_v2 pupper env
 
 import os
+import pickle
 import puppersim
 import gin
 from pybullet_envs.minitaur.envs_v2 import env_loader
 from pybullet import COV_ENABLE_GUI
 import puppersim.data as pd
+
+
+
 
 def create_pupper_env(args):
   CONFIG_DIR = puppersim.getPupperSimPath()
@@ -54,7 +58,8 @@ def main(argv):
   parser.add_argument('--run_on_robot', action='store_true', help='whether to run the policy on the robot instead of in simulation. Default is False.')
   parser.add_argument('--render', default=False, action='store_true', help='whether to render the robot. Default is False.')
   parser.add_argument('--profile', default=False, action='store_true', help='whether to print timing for parts of the code. Default is False.')
-  parser.add_argument('--plot', default=True, action='store_true', help='whether to plot action and observation histories after running the policy.')
+  parser.add_argument('--plot', default=False, action='store_true', help='whether to plot action and observation histories after running the policy.')
+  parser.add_argument("--log_to_file", default=False, action='store_true', help="Whether to log data to the disk.")
   if len(argv):
     args = parser.parse_args(argv)
   else:
@@ -114,8 +119,14 @@ def main(argv):
   returns = []
   observations = []
   actions = []
-  for i in range(args.num_rollouts):
-    print('iter', i)
+
+  log_dict = {
+      't': [],
+      'IMU': [],
+      'MotorAngle': [],
+      'action': []
+  }
+  try: #for i in range(args.num_rollouts):
     obs = env.reset()
     done = False
     totalr = 0.
@@ -135,12 +146,23 @@ def main(argv):
           actions.append(action)
 
         obs, r, done, _ = env.step(action)
+        if args.log_to_file:
+          log_dict['t'].append(env.robot.GetTimeSinceReset())
+          log_dict['MotorAngle'].append(obs[0:12])
+          log_dict['IMU'].append(obs[12:16])
+          log_dict['action'].append(action)
+
         totalr += r
         steps += 1
         if args.profile:
           print('policy.act(obs): ', after_policy - before_policy)
           print('wallclock_control_code: ', time.time() - start_time_wall)
     returns.append(totalr)
+  finally:
+    if args.log_to_file:
+      print("logging to file...")
+      with open("env_ars_log.txt", "wb") as f:
+        pickle.dump(log_dict, f)
 
   print('returns: ', returns)
   print('mean return: ', np.mean(returns))
