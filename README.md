@@ -35,6 +35,22 @@ python3 puppersim/pupper_ars_train.py --rollout_length=200
 ray stop (after training is completed)
 ```
 
+### Troubleshooting
+* **Pybullet hangs when starting training**. Possible issue: You have multiple suspended pybullet clients. Solution: Restart your computer. 
+* **ConnectionRefusedError: [Errno 61] Connection refused**. Issue: Your ray server is running on a different IP address than the training script expects. Solution: Add the following argument `--redis_address=127.0.0.1:6379` when running `pupper_ars_train.py`.
+
+### Guidelines for saving policies
+If you want to save a policy, create a folder within `puppersim/data` with the type of gait and date, eg `pretrained_trot_1_22_22`. From the `data` folder, copy the following files into the folder you just made.
+
+
+* The `.npz` policy file you want, e.g. `lin_policy_plus_latest.npz`
+* `log.txt`
+* `params.json`
+
+From `puppersim/config` also copy the `.gin` file you used to train the robot, e.g. `pupper_pmtg.gin` file into the folder you just made. When you run a policy on the robot, make sure your `pupper_robot_*_.gin` file matches the `pupper_pmtg.gin` file you saved.
+
+Then add a `README.md` in the folder with a brief description of what you did, including your motivation for saving this policy. 
+
 
 ## Test an ARS policy during training (file location may be different)
 ```
