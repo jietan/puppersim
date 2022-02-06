@@ -91,5 +91,5 @@ class MinitaurPushRandomizer(env_randomizer_base.EnvRandomizerBase):
                                              linkIndex=self._applied_link_id,
                                              forceObj=self._applied_force,
                                              posObj=[0.0, 0.0, 0.0],
-                                             flags=env.pybullet_client.LINK_FRAME)
+                                             flags=env.pybullet_client.WORLD_FRAME)
       # print("apply force", self._applied_force)
