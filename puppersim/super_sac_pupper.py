@@ -271,7 +271,7 @@ if __name__ == "__main__":
     parser.add_argument("--name", type=str, required=True)
     parser.add_argument("--config", type=str, required=True)
     parser.add_argument(
-        "--logging", type=str, default="wandb", choices=["wandb", "tensorboard"]
+        "--logging", type=str, default="tensorboard", choices=["wandb", "tensorboard"]
     )
     args = parser.parse_args()
     main(args)
