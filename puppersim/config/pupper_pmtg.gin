@@ -13,6 +13,7 @@ import puppersim.pupper_constants
 import puppersim.pupper_locomotion_task
 import puppersim.pupper_terminal_conditions
 import puppersim.pupper_randomized_ground
+import puppersim.push_randomizer
 import puppersim.speed_task
 
 import puppersim.pupper_v2
@@ -54,6 +55,23 @@ locomotion_gym_env.LocomotionGymEnv.scene = @simple_scene.SimpleScene()
 pupper_randomized_ground.BumpyScene.lateral_friction=1.8
 pupper_randomized_ground.BumpyScene.height_perturbation_range=0.03
 
+# Randomizers.
+locomotion_gym_env.LocomotionGymEnv.env_randomizers = [
+  @push_randomizer.MinitaurPushRandomizer(),
+]
+# Force started to get applied at this env step (sim_step * action repeat)
+push_randomizer.MinitaurPushRandomizer.perturbation_start_step = 50
+# How long the push force is active for (in env steps).
+push_randomizer.MinitaurPushRandomizer.perturbation_duration_steps = 50
+# How many env steps to wait before applying another new force.
+push_randomizer.MinitaurPushRandomizer.perturbation_interval_steps = 50
+
+# NOTE: before the env randomization interface is fixed, multiply the value
+# by NUM_ACTION_REPEAT to approximate the effect. 
+# Maximum horizontal force (N).
+push_randomizer.MinitaurPushRandomizer.horizontal_force_bound = (0, 10)
+# Maximum vertival force, positive direction is down. (N).
+push_randomizer.MinitaurPushRandomizer.vertical_force_bound = (-3, 5)
 
 # Specify the motor limits, and motor control mode.
 robot_config.MotorLimits.angle_lower_limits = %pupper_constants.MOTOR_ACTION_LOWER_LIMIT

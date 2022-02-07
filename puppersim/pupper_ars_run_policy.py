@@ -60,6 +60,7 @@ def main(argv):
   parser.add_argument('--profile', default=False, action='store_true', help='whether to print timing for parts of the code. Default is False.')
   parser.add_argument('--plot', default=False, action='store_true', help='whether to plot action and observation histories after running the policy.')
   parser.add_argument("--log_to_file", default=False, action='store_true', help="Whether to log data to the disk.")
+  parser.add_argument("--realtime", default=False, help="Run at realtime.")
   if len(argv):
     args = parser.parse_args(argv)
   else:
@@ -132,31 +133,45 @@ def main(argv):
     totalr = 0.
     steps = 0
     start_time_wall = time.time()
+    env_start_time_wall = time.time()
+    last_spammy_log = 0.0
     while not done or args.run_on_robot:
-      if time.time() - start_time_wall > env.env_time_step:
-        if args.profile:
-          print("loop dt:", time.time() - start_time_wall)
-        start_time_wall = time.time()
-        before_policy = time.time()
-        action = policy.act(obs)
-        after_policy = time.time()
+      if args.realtime or args.run_on_robot:  # always run at realtime with real robot
+        # Sync to real time.
+        wall_elapsed = time.time() - env_start_time_wall
+        sim_elapsed = env.env_step_counter * env.env_time_step
+        sleep_time = sim_elapsed - wall_elapsed
+        if sleep_time > 0:
+          print(sleep_time)
+          time.sleep(sleep_time)
+        elif sleep_time < -1 and time.time() - last_spammy_log > 1.0:
+          print(f"Cannot keep up with realtime. {-sleep_time:.2f} sec behind, "
+                f"sim/wall ratio {(sim_elapsed/wall_elapsed):.2f}.")
+          last_spammy_log = time.time()
 
-        if not args.run_on_robot:
-          observations.append(obs)
-          actions.append(action)
+      if args.profile:
+        print("loop dt:", time.time() - start_time_wall)
+      start_time_wall = time.time()
+      before_policy = time.time()
+      action = policy.act(obs)
+      after_policy = time.time()
 
-        obs, r, done, _ = env.step(action)
-        if args.log_to_file:
-          log_dict['t'].append(env.robot.GetTimeSinceReset())
-          log_dict['MotorAngle'].append(obs[0:12])
-          log_dict['IMU'].append(obs[12:16])
-          log_dict['action'].append(action)
+      if not args.run_on_robot:
+        observations.append(obs)
+        actions.append(action)
 
-        totalr += r
-        steps += 1
-        if args.profile:
-          print('policy.act(obs): ', after_policy - before_policy)
-          print('wallclock_control_code: ', time.time() - start_time_wall)
+      obs, r, done, _ = env.step(action)
+      if args.log_to_file:
+        log_dict['t'].append(env.robot.GetTimeSinceReset())
+        log_dict['MotorAngle'].append(obs[0:12])
+        log_dict['IMU'].append(obs[12:16])
+        log_dict['action'].append(action)
+
+      totalr += r
+      steps += 1
+      if args.profile:
+        print('policy.act(obs): ', after_policy - before_policy)
+        print('wallclock_control_code: ', time.time() - start_time_wall)
     returns.append(totalr)
   finally:
     if args.log_to_file:

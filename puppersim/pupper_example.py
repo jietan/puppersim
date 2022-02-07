@@ -36,6 +36,7 @@ flags.DEFINE_bool("render", True, "Whether to render the example.")
 flags.DEFINE_bool("profile", False, "Whether to print timing results for different parts of the code.")
 flags.DEFINE_bool("run_on_robot", False, "Whether to run on robot or in simulation.")
 flags.DEFINE_bool("log_to_file", False, "Whether to log data to the disk.")
+flags.DEFINE_bool("realtime", False, "Run at realtime.")
 FLAGS = flags.FLAGS
 CONFIG_DIR = puppersim.getPupperSimPath()
 _NUM_STEPS = 100000
@@ -67,7 +68,6 @@ def run_example(num_max_steps=_NUM_STEPS):
 
   # BUG: the motor limits defined by the robot override those of the motor model here
   # https://github.com/bulletphysics/bullet3/blob/48dc1c45da685c77d3642545c4851b05fb3a1e8b/examples/pybullet/gym/pybullet_envs/minitaur/robots/quadruped_base.py#L131
-
   print("env.action_space=",env.action_space)
   obs = env.reset()
   last_control_step = time.time()
@@ -80,7 +80,21 @@ def run_example(num_max_steps=_NUM_STEPS):
   if FLAGS.log_to_file:
     f = open("env_log.txt", "wb")
   try:
+    env_start_wall = time.time()
+    last_spammy_log = 0.0
     for i in range(num_max_steps):
+      if FLAGS.realtime or FLAGS.run_on_robot:
+        # Sync to real time.
+        wall_elapsed = time.time() - env_start_wall
+        sim_elapsed = env.env_step_counter * env.env_time_step
+        sleep_time = sim_elapsed - wall_elapsed
+        if sleep_time > 0:
+          time.sleep(sleep_time)
+        elif sleep_time < -1 and time.time() - last_spammy_log > 1.0:
+          print(f"Cannot keep up with realtime. {-sleep_time:.2f} sec behind, "
+                f"sim/wall ratio {(sim_elapsed/wall_elapsed):.2f}.")
+          last_spammy_log = time.time()
+
       delta_time = env.robot.GetTimeSinceReset()
       # 1Hz signal
       phase = delta_time * 1 * np.pi 
