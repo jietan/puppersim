@@ -137,30 +137,35 @@ class NoRender(gym.Wrapper):
 
 
 @gin.configurable
-def create_pupper_env(render=False, from_pixels=False, skip=1, stack=1):
+def create_pupper_env(
+    render=False, from_pixels=False, skip=1, stack=1, parallel_actors=1
+):
     # build env from pybullet config
-    CONFIG_DIR = puppersim.getPupperSimPath() + "/config/"
-    _CONFIG_FILE = os.path.join(CONFIG_DIR, "pupper_manual_rl.gin")
-    gin.bind_parameter("scene_base.SceneBase.data_root", pd.getDataPath() + "/")
-    gin.parse_config_file(_CONFIG_FILE)
-    if render:
-        gin.bind_parameter("SimulationParameters.enable_rendering", True)
-    env = env_loader.load()
 
-    if from_pixels:
-        env = PupperFromVision(env)
-        env = FrameSkip(env, skip=skip)
-        env = FrameStack(env, num_stack=stack)
-        env = NormActionSpace(env)
-    else:
-        env = AddPosition(env)
-        env = NormActionSpace(env)
-        env = AddActionReward(env)
-        env = StateStack(env, num_stack=stack, skip=skip)
-        env = NoRender(env)
+    def _make_env():
+        CONFIG_DIR = puppersim.getPupperSimPath() + "/config/"
+        _CONFIG_FILE = os.path.join(CONFIG_DIR, "pupper_manual_rl.gin")
+        gin.bind_parameter("scene_base.SceneBase.data_root", pd.getDataPath() + "/")
+        gin.parse_config_file(_CONFIG_FILE)
+        if render:
+            gin.bind_parameter("SimulationParameters.enable_rendering", True)
+        env = env_loader.load()
 
-    env = ScaleReward(env, scale=100.0)
+        if from_pixels:
+            env = PupperFromVision(env)
+            env = FrameSkip(env, skip=skip)
+            env = FrameStack(env, num_stack=stack)
+            env = NormActionSpace(env)
+        else:
+            env = AddPosition(env)
+            env = NormActionSpace(env)
+            env = AddActionReward(env)
+            env = StateStack(env, num_stack=stack, skip=skip)
+            env = NoRender(env)
 
+        return ScaleReward(env, scale=100.0)
+
+    env = ParallelActors(_make_env, parallel_actors)
     if from_pixels:
         env = Uint8Wrapper(env)
     else:
@@ -242,7 +247,7 @@ def create_agent(train_env, encoder_cls=None):
 
 def train_pupper(name, logging_method):
     train_env = create_pupper_env()
-    test_env = create_pupper_env()
+    test_env = create_pupper_env(parallel_actors=1)
     agent = create_agent(train_env)
     buffer = super_sac.replay.ReplayBuffer(size=1_000_000)
     super_sac.super_sac(

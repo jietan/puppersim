@@ -6,6 +6,7 @@ create_pupper_env.render = False
 create_pupper_env.from_pixels = False
 create_pupper_env.skip = 1
 create_pupper_env.stack = 2
+create_pupper_env.parallel_actors = 6
 
 create_agent.encoder_cls = @CCEncoder
 
