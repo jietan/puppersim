@@ -1,4 +1,4 @@
-
+import puppersim.joint_offset_wrapper
 import pybullet_envs.minitaur.envs_v2.env_wrappers.observation_dictionary_to_array_wrapper
 import pybullet_envs.minitaur.envs_v2.locomotion_gym_config
 import pybullet_envs.minitaur.envs_v2.locomotion_gym_env
@@ -74,6 +74,6 @@ pupper_motor_model.PupperMotorModel.motor_damping = 0.0045 # [Nm/(rad/s)]
 pupper_motor_model.PupperMotorModel.motor_torque_dependent_friction = 0.28 # [unitless]
 
 pupper_v2.Pupper.sensors = %SENSORS    
-env_loader.load.wrapper_classes = []
+env_loader.load.wrapper_classes = [@joint_offset_wrapper.JointOffsetWrapperEnv]
 #    @observation_dictionary_to_array_wrapper.ObservationDictionaryToArrayWrapper]    
 

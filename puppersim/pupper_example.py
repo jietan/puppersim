@@ -63,8 +63,8 @@ def run_example(num_max_steps=_NUM_STEPS):
   env = env_loader.load()
   env.seed(_ENV_RANDOM_SEED)
 
-  env._pybullet_client.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
-  env._pybullet_client.configureDebugVisualizer(p.COV_ENABLE_SHADOWS, 0)
+  env.pybullet_client.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
+  env.pybullet_client.configureDebugVisualizer(p.COV_ENABLE_SHADOWS, 0)
 
   # BUG: the motor limits defined by the robot override those of the motor model here
   # https://github.com/bulletphysics/bullet3/blob/48dc1c45da685c77d3642545c4851b05fb3a1e8b/examples/pybullet/gym/pybullet_envs/minitaur/robots/quadruped_base.py#L131
@@ -104,7 +104,7 @@ def run_example(num_max_steps=_NUM_STEPS):
       action[:3] = (np.sin(phase) * 0.6 + 0.8) * action[:3]
       action[9:] = (np.sin(phase) * 0.6 + 0.8) * action[9:]
       # NOTE: We do not fix the loop rate so be careful if using a policy that is solely dependent on time
-
+      action = np.zeros(12)
       before_step_timestamp = time.time()
       obs, reward, done, _ = env.step(action)
       after_step_timestamp = time.time()
