@@ -119,6 +119,7 @@ cat ~/.ssh/id_rsa.pub | ssh pi@raspberrypi.local 'mkdir -p .ssh/ && cat >> .ssh/
 <details>
   <summary>Click to expand</summary>
   Navigate to the outer puppersim folder and run
+  
   ```bash
   python3 puppersim/pupper_server.py
   ```
@@ -129,21 +130,15 @@ cat ~/.ssh/id_rsa.pub | ssh pi@raspberrypi.local 'mkdir -p .ssh/ && cat >> .ssh/
   cd StanfordQuadruped
   git checkout dji
   ```
-  The `dji` branch is checked out so you can use the version of code for Pupper V2 rather than the servo-based Pupper V1.
-
   In a separate terminal, navigate to StanfordQuadruped and run 
   ```bash
   python3 run_djipupper_sim.py
   ```
 
   Keyboard controls:
-  * wasd: left joystick --> moves robot forward/back and left/right
-  * arrow keys: right joystick --> turns robot left/right
-  * q: L1 --> activates/deactivates robot
-  * e: R1 --> starts/stops trotting gait
-  * ijkl: d-pad
-  * x: X
-  * square: u
-  * triangle: t
-  * circle: c
+  * wasd --> moves robot forward/back and left/right
+  * arrow keys --> turns robot left/right
+  * q --> activates/deactivates robot
+  * e --> starts/stops trotting gait
+  * ijkl --> tilts and raises robot
 </details>
