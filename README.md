@@ -38,9 +38,11 @@ You should see the PyBullet GUI pop up and see Pupper doing an exercise.
 <br/>
 
 ## Training
+From the outer puppersim folder run:
 ```bash
 python3 puppersim/pupper_ars_train.py --rollout_length=200
 ```
+Depending on your computer specs, each training iteration will take around 1 - 5 seconds.
 
 ### Troubleshooting
 <details>
@@ -67,11 +69,12 @@ Then add a `README.md` in the folder with a brief description of what you did, i
 </details>
 <br/>
 
-## Test an ARS policy during training (file location may be different)
+## Test an ARS policy
+You can visualize the policy during or after training with the following command. From the outer puppersim folder run:
 ```
 python3 puppersim/pupper_ars_run_policy.py  --expert_policy_file  data/lin_policy_plus_latest.npz  --json_file data/params.json --render
 ```
-
+If you specified non-default locations for the expert policy and json files when running the training command, you should specify the correct locations in this command.
 ## Deployment
 ### Prerequisites
 <details>
