@@ -1,3 +1,5 @@
+import puppersim.joint_offset_wrapper
+
 import pybullet_envs.minitaur.envs_v2.env_wrappers.pmtg_wrapper_env
 import pybullet_envs.minitaur.envs_v2.env_wrappers.observation_dictionary_to_array_wrapper
 import pybullet_envs.minitaur.envs_v2.locomotion_gym_config
@@ -12,8 +14,6 @@ import puppersim.pupper_motor_model
 import puppersim.pupper_constants
 import puppersim.pupper_locomotion_task
 import puppersim.pupper_terminal_conditions
-import puppersim.pupper_randomized_ground
-import puppersim.push_randomizer
 import puppersim.speed_task
 
 import puppersim.pupper_v2
@@ -49,29 +49,9 @@ locomotion_gym_env.LocomotionGymEnv.gym_config = @locomotion_gym_config.Locomoti
 # robot_urdf_loader.RobotUrdfLoader.constrained_base = True
 # robot_urdf_loader.RobotUrdfLoader.init_base_position = (0,0, 1.0)
 
+# locomotion_gym_env.LocomotionGymEnv.scene = None
+
 locomotion_gym_env.LocomotionGymEnv.scene = @simple_scene.SimpleScene()
-#locomotion_gym_env.LocomotionGymEnv.scene = @pupper_randomized_ground.BumpyScene()
-
-pupper_randomized_ground.BumpyScene.lateral_friction=1.8
-pupper_randomized_ground.BumpyScene.height_perturbation_range=0.03
-
-# Randomizers.
-locomotion_gym_env.LocomotionGymEnv.env_randomizers = [
-  @push_randomizer.MinitaurPushRandomizer(),
-]
-# Force started to get applied at this env step (sim_step * action repeat)
-push_randomizer.MinitaurPushRandomizer.perturbation_start_step = 50
-# How long the push force is active for (in env steps).
-push_randomizer.MinitaurPushRandomizer.perturbation_duration_steps = 50
-# How many env steps to wait before applying another new force.
-push_randomizer.MinitaurPushRandomizer.perturbation_interval_steps = 50
-
-# NOTE: before the env randomization interface is fixed, multiply the value
-# by NUM_ACTION_REPEAT to approximate the effect. 
-# Maximum horizontal force (N).
-push_randomizer.MinitaurPushRandomizer.horizontal_force_bound = (0, 10)
-# Maximum vertival force, positive direction is down. (N).
-push_randomizer.MinitaurPushRandomizer.vertical_force_bound = (-3, 5)
 
 # Specify the motor limits, and motor control mode.
 robot_config.MotorLimits.angle_lower_limits = %pupper_constants.MOTOR_ACTION_LOWER_LIMIT
@@ -112,12 +92,13 @@ pmtg_wrapper_env.PmtgWrapperEnv.action_filter_enable = True
 pmtg_wrapper_env.PmtgWrapperEnv.intensity_upper_bound = 1.0
 pmtg_wrapper_env.PmtgWrapperEnv.max_delta_time = 2.0
 pmtg_wrapper_env.PmtgWrapperEnv.min_delta_time = 0.5
-pmtg_wrapper_env.PmtgWrapperEnv.residual_range = 0.3
+pmtg_wrapper_env.PmtgWrapperEnv.residual_range = 0.5
 pmtg_wrapper_env.PmtgWrapperEnv.integrator_coupling_mode = "all coupled"
 pmtg_wrapper_env.PmtgWrapperEnv.walk_height_coupling_mode = "all coupled"
 pmtg_wrapper_env.PmtgWrapperEnv.variable_swing_stance_ratio = 1
-pmtg_wrapper_env.PmtgWrapperEnv.init_gait = "walk"
+pmtg_wrapper_env.PmtgWrapperEnv.init_gait = "trot"
 
 env_loader.load.wrapper_classes = [
+    @joint_offset_wrapper.JointOffsetWrapperEnv,
     @pmtg_wrapper_env.PmtgWrapperEnv,
     @observation_dictionary_to_array_wrapper.ObservationDictionaryToArrayWrapper]    
