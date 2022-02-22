@@ -40,7 +40,6 @@ You should see the PyBullet GUI pop up and see Pupper doing an exercise.
 ## Training
 ```bash
 python3 puppersim/pupper_ars_train.py --rollout_length=200
-ray stop (after training is completed)
 ```
 
 ### Troubleshooting
