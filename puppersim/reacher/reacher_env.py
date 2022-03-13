@@ -26,6 +26,17 @@ class ReacherEnv(gym.Env):
                 force=0)
         self.target = np.random.uniform(0.05, 0.1, 3)
 
+    def setTarget(self, target):
+        self.target = target
+
+    def calculateInverseKinematics(self, target_pos):
+        # compute end effector pos in cartesian cords given angles
+        end_effector_link_id = self._get_end_effector_link_id()
+        inverse_kinematics = pybullet.calculateInverseKinematics(self.robot_id, end_effector_link_id, target_pos)
+
+        return inverse_kinematics
+
+
     def step(self, actions):
         for joint_id, action in zip(range(self.num_joints), actions):
             # Disables the default motors in PyBullet.
@@ -56,7 +67,7 @@ class ReacherEnv(gym.Env):
     def _get_vector_from_end_effector_to_goal(self):
         end_effector_link_id = self._get_end_effector_link_id()
         end_effector_pos = pybullet.getLinkState(bodyUniqueId=self.robot_id, linkIndex=end_effector_link_id, computeForwardKinematics=1)[0]
-        return np.array(end_effector_pos)
+        return np.array(end_effector_pos) - np.array(self.target)
 
     def _get_obs(self):
         joint_states = pybullet.getJointStates(self.robot_id, list(range(self.num_joints)))
