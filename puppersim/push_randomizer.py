@@ -60,6 +60,7 @@ class MinitaurPushRandomizer(env_randomizer_base.EnvRandomizerBase):
     self._vertical_force_bound = (vertical_force_bound if vertical_force_bound else
                                   [_VERTICAL_FORCE_LOWER_BOUND, _VERTICAL_FORCE_UPPER_BOUND])
     self._applied_link_id = -1
+    self._perturbation_parameter_dict = None
 
   def randomize_env(self, env):
     """Randomizes the simulation environment.
@@ -87,9 +88,26 @@ class MinitaurPushRandomizer(env_randomizer_base.EnvRandomizerBase):
     if (env.env_step_counter % self._perturbation_interval_steps <
         self._perturbation_duration_steps) and (env.env_step_counter >=
                                                 self._perturbation_start_step):
-      env.pybullet_client.applyExternalForce(objectUniqueId=env.robot.robot_id,
-                                             linkIndex=self._applied_link_id,
-                                             forceObj=self._applied_force,
-                                             posObj=[0.0, 0.0, 0.0],
-                                             flags=env.pybullet_client.WORLD_FRAME)
-      # print("apply force", self._applied_force)
+      self._perturbation_parameter_dict = dict(objectUniqueId=env.robot.robot_id,
+                                               linkIndex=self._applied_link_id,
+                                               forceObj=self._applied_force,
+                                               posObj=[0.0, 0.0, 0.0],
+                                               flags=env.pybullet_client.WORLD_FRAME)
+    else:
+      self._perturbation_parameter_dict = None
+
+  def randomize_sub_step(self, env, sub_step_index, num_sub_steps):
+    """Randomize simulation sub steps.
+
+    Will be called at every simulation step. This is the correct place to add
+    random forces/torques.
+
+    Args:
+      env: The Minitaur gym environment to be randomized.
+      sub_step_index: Index of sub step, from 0 to N-1. N is the action repeat.
+      num_sub_steps: Number of sub steps, equals to action repeat.
+    """
+    if self._perturbation_parameter_dict is not None:
+      print("Apply random force : ", self._perturbation_parameter_dict["forceObj"])
+      env.pybullet_client.applyExternalForce(**self._perturbation_parameter_dict)
+

@@ -17,6 +17,7 @@ import puppersim.pupper_terminal_conditions
 import puppersim.speed_task
 
 import puppersim.pupper_v2
+import puppersim.push_randomizer
 import pybullet_envs.minitaur.robots.robot_config
 
 
@@ -52,6 +53,17 @@ locomotion_gym_env.LocomotionGymEnv.gym_config = @locomotion_gym_config.Locomoti
 # locomotion_gym_env.LocomotionGymEnv.scene = None
 
 locomotion_gym_env.LocomotionGymEnv.scene = @simple_scene.SimpleScene()
+
+# Uncomment the following lines to enable push randomizer.
+# locomotion_gym_env.LocomotionGymEnv.env_randomizers = [
+#  # Push randomizer.
+#  @push_randomizer.MinitaurPushRandomizer(),
+#]
+# push_randomizer.MinitaurPushRandomizer.horizontal_force_bound = [-1, 1]  # Unit: Newton
+# push_randomizer.MinitaurPushRandomizer.vertical_force_bound = [-0.5, 0.5]  # Unit: Newton
+# push_randomizer.MinitaurPushRandomizer.perturbation_start_step = 100  # step is env step == sim_step * action repeat
+# push_randomizer.MinitaurPushRandomizer.perturbation_interval_steps=200
+# push_randomizer.MinitaurPushRandomizer.perturbation_duration_steps=100
 
 # Specify the motor limits, and motor control mode.
 robot_config.MotorLimits.angle_lower_limits = %pupper_constants.MOTOR_ACTION_LOWER_LIMIT
