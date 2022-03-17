@@ -14,7 +14,7 @@ pip install ray arspb
 ```bash
 git clone https://github.com/jietan/puppersim.git
 cd puppersim
-pip install -e .         (there is a dot at the end)
+pip install -e .
 ```
 Then to verify the installation, run
 ```bash
@@ -38,22 +38,21 @@ You should see the PyBullet GUI pop up and see Pupper doing an exercise.
 <br/>
 
 ## Training
+From the outer puppersim folder run:
 ```bash
-ray start --head
 python3 puppersim/pupper_ars_train.py --rollout_length=200
-ray stop (after training is completed)
 ```
+Depending on your computer specs, each training iteration will take around 1 - 5 seconds.
 
 ### Troubleshooting
 <details>
 <summary>Click to expand</summary>
 
 * **Pybullet hangs when starting training**. Possible issue: You have multiple suspended pybullet clients. Solution: Restart your computer. 
-* **ConnectionRefusedError: [Errno 61] Connection refused**. Issue: Your ray server is running on a different IP address than the training script expects. Solution: Look at the output of `ray start --head` for the address of the Ray runtime. It'll say something like `To connect to this Ray runtime from another node, run ray start --address='x.x.x.x:xxxx'`. Use the address provided and add the argument `--redis_address=[x.x.x.x:xxxx` when running `pupper_ars_train.py`.
 </details>
 <br/>
 
-### Guidelines for saving policies
+### Protocol for saving policies
 <details>
 <summary>Click to expand</summary>
 
@@ -70,11 +69,12 @@ Then add a `README.md` in the folder with a brief description of what you did, i
 </details>
 <br/>
 
-## Test an ARS policy during training (file location may be different)
+## Test an ARS policy
+You can visualize the policy during or after training with the following command. From the outer puppersim folder run:
 ```
 python3 puppersim/pupper_ars_run_policy.py  --expert_policy_file  data/lin_policy_plus_latest.npz  --json_file data/params.json --render
 ```
-
+If you specified non-default locations for the expert policy and json files when running the training command, you should specify the correct locations in this command.
 ## Deployment
 ### Prerequisites
 <details>
