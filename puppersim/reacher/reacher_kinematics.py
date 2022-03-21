@@ -1,6 +1,5 @@
 import pybullet
 import puppersim.data as pd
-from pybullet_utils import bullet_client
 import time
 import math
 import gym
@@ -14,18 +13,9 @@ KD = 2.0
 MAX_CURRENT = 7.0
 
 
-class ReacherEnv(gym.Env):
+class Kinematics():
 
-  def __init__(self, run_on_robot=False, render=False):
-    self.action_space = gym.spaces.Box(
-        np.array([-math.pi/2, -math.pi/2, -math.pi/2]),
-        np.array([math.pi/2, math.pi/2, math.pi/2]),
-        dtype=np.float32)
-    self.observation_space = gym.spaces.Box(
-        np.array([-1, -1, -1, -1, -1, -1, 0.05, 0.05, 0.05, -1, -1 ,-1, -0.3, -0.3, -0.3]),
-        np.array([1, 1, 1, 1, 1, 1, 0.1, 0.1, 0.1, 1, 1, 1, 0.3, 0.3, 0.3]),
-        dtype=np.float32)
-
+  def __init__(self, run_on_robot=False):
     self._run_on_robot = run_on_robot
     if self._run_on_robot:
       # serial_port = next(list_ports.grep(".*ttyACM0.*")).device
@@ -35,37 +25,25 @@ class ReacherEnv(gym.Env):
       self._hardware_interface.set_joint_space_parameters(
           kp=KP, kd=KD, max_current=MAX_CURRENT)
     else:
-      if render:
-        self._bullet_client = bullet_client.BulletClient(connection_mode=pybullet.GUI)
-        self._bullet_client.configureDebugVisualizer(self._bullet_client.COV_ENABLE_GUI, 0)
-        self._bullet_client.resetDebugVisualizerCamera(cameraDistance=0.3, cameraYaw=-134, cameraPitch=-30, cameraTargetPosition=[0,0,0.1])
-      else:
-        self._bullet_client = bullet_client.BulletClient(connection_mode=pybullet.DIRECT)
+      pybullet.connect(pybullet.GUI)
 
   def reset(self):
     if self._run_on_robot:
-      return self._get_obs_on_robot()
+      pass
     else:
-      self._bullet_client.resetSimulation()
+      pybullet.resetSimulation()
       URDF_PATH = pd.getDataPath() + "/pupper_arm.urdf"
-      self.robot_id = self._bullet_client.loadURDF(URDF_PATH, useFixedBase=True)
-      self._bullet_client.setGravity(0, 0, -9.8)
-      self.num_joints = self._bullet_client.getNumJoints(self.robot_id)
+      self.robot_id = pybullet.loadURDF(URDF_PATH, useFixedBase=True)
+      pybullet.setGravity(0, 0, -9.8)
+      self.num_joints = pybullet.getNumJoints(self.robot_id)
       for joint_id in range(self.num_joints):
         # Disables the default motors in PyBullet.
-        self._bullet_client.setJointMotorControl2(bodyIndex=self.robot_id,
+        pybullet.setJointMotorControl2(bodyIndex=self.robot_id,
                                        jointIndex=joint_id,
-                                       controlMode=self._bullet_client.VELOCITY_CONTROL,
+                                       controlMode=pybullet.VELOCITY_CONTROL,
                                        targetVelocity=0,
                                        force=0)
-    # self.target = np.random.uniform(0.05, 0.1, 3)
-    self.target = np.array([0.05, 0.05, 0.05])
-
-    self._target_visual_shape = self._bullet_client.createVisualShape(self._bullet_client.GEOM_SPHERE, radius=0.015)
-
-    self._target_visualization = self._bullet_client.createMultiBody(baseVisualShapeIndex=self._target_visual_shape, basePosition=self.target)
-
-    return self._get_obs()
+    self.target = np.random.uniform(0.05, 0.1, 3)
 
   def setTarget(self, target):
     self.target = target
@@ -73,7 +51,7 @@ class ReacherEnv(gym.Env):
   def calculateInverseKinematics(self, target_pos):
     # compute end effector pos in cartesian cords given angles
     end_effector_link_id = self._get_end_effector_link_id()
-    inverse_kinematics = self._bullet_client.calculateInverseKinematics(
+    inverse_kinematics = pybullet.calculateInverseKinematics(
         self.robot_id, end_effector_link_id, target_pos)
 
     return inverse_kinematics
@@ -81,9 +59,9 @@ class ReacherEnv(gym.Env):
   def _apply_actions(self, actions):
     for joint_id, action in zip(range(self.num_joints), actions):
       # Disables the default motors in PyBullet.
-      self._bullet_client.setJointMotorControl2(bodyIndex=self.robot_id,
+      pybullet.setJointMotorControl2(bodyIndex=self.robot_id,
                                      jointIndex=joint_id,
-                                     controlMode=self._bullet_client.POSITION_CONTROL,
+                                     controlMode=pybullet.POSITION_CONTROL,
                                      targetPosition=action)
 
   def _apply_actions_on_robot(self, actions):
@@ -95,7 +73,7 @@ class ReacherEnv(gym.Env):
     self._hardware_interface.set_actuator_postions(np.array(full_actions))
 
   def _get_obs(self):
-    joint_states = self._bullet_client.getJointStates(self.robot_id,
+    joint_states = pybullet.getJointStates(self.robot_id,
                                            list(range(self.num_joints)))
     joint_angles = [joint_data[0] for joint_data in joint_states][0:3]
     joint_velocities = [joint_data[1] for joint_data in joint_states][0:3]
@@ -128,7 +106,7 @@ class ReacherEnv(gym.Env):
     else:
       self._apply_actions(actions)
       ob = self._get_obs()
-      self._bullet_client.stepSimulation()
+      pybullet.stepSimulation()
 
     reward_dist = -np.linalg.norm(self._get_vector_from_end_effector_to_goal())
     reward_ctrl = 0
@@ -140,7 +118,7 @@ class ReacherEnv(gym.Env):
 
   def _get_end_effector_link_id(self):
     for joint_id in range(self.num_joints):
-      joint_name = self._bullet_client.getJointInfo(self.robot_id, joint_id)[1]
+      joint_name = pybullet.getJointInfo(self.robot_id, joint_id)[1]
       if joint_name.decode("UTF-8") == "leftFrontToe":
         return joint_id
     raise ValueError("leftFrontToe not found")
@@ -155,9 +133,10 @@ class ReacherEnv(gym.Env):
       end_effector_pos = self._forward_kinematics(joint_angles)
     else:
       end_effector_link_id = self._get_end_effector_link_id()
-      end_effector_pos = self._bullet_client.getLinkState(bodyUniqueId=self.robot_id,
+      end_effector_pos = pybullet.getLinkState(bodyUniqueId=self.robot_id,
                                                linkIndex=end_effector_link_id,
                                                computeForwardKinematics=1)[0]
+      print("end effector pos", end_effector_pos)
     return np.array(end_effector_pos) - np.array(self.target)
 
   def shutdown(self):
