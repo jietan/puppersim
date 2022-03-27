@@ -9,9 +9,9 @@ import random
 from pupper_hardware_interface import interface
 from serial.tools import list_ports
 
-KP = 16.0
-KD = 2.0
-MAX_CURRENT = 7.0
+KP = 4.0
+KD = 4.0
+MAX_CURRENT = 2.0
 
 
 class ReacherEnv(gym.Env):
@@ -29,6 +29,9 @@ class ReacherEnv(gym.Env):
     self._hip_offset = 0.0335
     self._l1_length = 0.08
     self._l2_length = 0.11
+
+    # self.target = np.random.uniform(0.5, 0.1, 3)
+    self.target = np.array([0.07, 0.07, 0.07])
 
     self._run_on_robot = run_on_robot
     if self._run_on_robot:
@@ -63,9 +66,9 @@ class ReacherEnv(gym.Env):
                                        targetVelocity=0,
                                        force=0)
     # self.target = np.random.uniform(0.5, 0.1, 3)
-    # self.target = np.array([0.07, 0.07, 0.07])
-    target_angles = np.random.uniform(-0.05*math.pi, 0.05*math.pi, 3)
-    self.target = self._forward_kinematics(target_angles)
+    self.target = np.array([0.07, 0.07, 0.07])
+    # target_angles = np.random.uniform(-0.05*math.pi, 0.05*math.pi, 3)
+    # self.target = self._forward_kinematics(target_angles)
 
     self._target_visual_shape = self._bullet_client.createVisualShape(self._bullet_client.GEOM_SPHERE, radius=0.015)
 
@@ -125,14 +128,14 @@ class ReacherEnv(gym.Env):
         np.cos(joint_angles),
         np.sin(joint_angles),
         self.target,
-        joint_velocities,
+        # joint_velocities,
         self._get_vector_from_end_effector_to_goal(),
     ])
 
   def step(self, actions):
 
     if self._run_on_robot:
-      self._apply_actions_on_robot(clamped_action)
+      self._apply_actions_on_robot(actions)
       ob = self._get_obs_on_robot()
     else:
       self._apply_actions(actions)

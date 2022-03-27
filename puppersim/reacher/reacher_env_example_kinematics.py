@@ -81,7 +81,7 @@ def run_example():
         time.sleep(0.002)
         desired_end_effector_pos = env.target
         guess = calculate_inverse_kinematics(desired_end_effector_pos, guess)
-        obs, reward, done, _ = env.step(actions=guess)
+        obs, reward, done, _ = env.step(actions=np.array([0., 0., 0.]))
         cumulative_reward += reward
         print("obs: ", obs)
         print("reward: ", cumulative_reward)
