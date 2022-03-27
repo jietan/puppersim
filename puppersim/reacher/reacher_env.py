@@ -18,13 +18,17 @@ class ReacherEnv(gym.Env):
 
   def __init__(self, run_on_robot=False, render=False):
     self.action_space = gym.spaces.Box(
-        np.array([-math.pi/2, -math.pi/2, -math.pi/2]),
-        np.array([math.pi/2, math.pi/2, math.pi/2]),
+        np.array([-0.9*math.pi, -0.8*math.pi, -math.pi]),
+        np.array([0.9*math.pi, 0.8*math.pi, math.pi]),
         dtype=np.float32)
     self.observation_space = gym.spaces.Box(
-        np.array([-1, -1, -1, -1, -1, -1, 0.05, 0.05, 0.05, -1, -1 ,-1, -0.3, -0.3, -0.3]),
-        np.array([1, 1, 1, 1, 1, 1, 0.1, 0.1, 0.1, 1, 1, 1, 0.3, 0.3, 0.3]),
+        np.array([-1, -1, -1, -1, -1, -1, 0.05, 0.05, 0.05, -0.3, -0.3, -0.3]),
+        np.array([1, 1, 1, 1, 1, 1, 0.1, 0.1, 0.1, 0.3, 0.3, 0.3]),
         dtype=np.float32)
+
+    self._hip_offset = 0.0335
+    self._l1_length = 0.08
+    self._l2_length = 0.11
 
     self._run_on_robot = run_on_robot
     if self._run_on_robot:
@@ -55,11 +59,13 @@ class ReacherEnv(gym.Env):
         # Disables the default motors in PyBullet.
         self._bullet_client.setJointMotorControl2(bodyIndex=self.robot_id,
                                        jointIndex=joint_id,
-                                       controlMode=self._bullet_client.VELOCITY_CONTROL,
+                                       controlMode=self._bullet_client.POSITION_CONTROL,
                                        targetVelocity=0,
                                        force=0)
-    # self.target = np.random.uniform(0.05, 0.1, 3)
-    self.target = np.array([0.05, 0.05, 0.05])
+    # self.target = np.random.uniform(0.5, 0.1, 3)
+    # self.target = np.array([0.07, 0.07, 0.07])
+    target_angles = np.random.uniform(-0.05*math.pi, 0.05*math.pi, 3)
+    self.target = self._forward_kinematics(target_angles)
 
     self._target_visual_shape = self._bullet_client.createVisualShape(self._bullet_client.GEOM_SPHERE, radius=0.015)
 
@@ -83,8 +89,9 @@ class ReacherEnv(gym.Env):
       # Disables the default motors in PyBullet.
       self._bullet_client.setJointMotorControl2(bodyIndex=self.robot_id,
                                      jointIndex=joint_id,
-                                     controlMode=self._bullet_client.POSITION_CONTROL,
+                                     controlMode=pybullet.POSITION_CONTROL,
                                      targetPosition=action)
+                                     
 
   def _apply_actions_on_robot(self, actions):
     full_actions = np.zeros([3, 4])
@@ -99,11 +106,12 @@ class ReacherEnv(gym.Env):
                                            list(range(self.num_joints)))
     joint_angles = [joint_data[0] for joint_data in joint_states][0:3]
     joint_velocities = [joint_data[1] for joint_data in joint_states][0:3]
+    # return np.array(self.target)
     return np.concatenate([
         np.cos(joint_angles),
         np.sin(joint_angles),
         self.target,
-        joint_velocities,
+        # joint_velocities,
         self._get_vector_from_end_effector_to_goal(),
     ])
 
@@ -122,8 +130,9 @@ class ReacherEnv(gym.Env):
     ])
 
   def step(self, actions):
+
     if self._run_on_robot:
-      self._apply_actions_on_robot(actions)
+      self._apply_actions_on_robot(clamped_action)
       ob = self._get_obs_on_robot()
     else:
       self._apply_actions(actions)
@@ -146,8 +155,28 @@ class ReacherEnv(gym.Env):
     raise ValueError("leftFrontToe not found")
 
   def _forward_kinematics(self, joint_angles):
-    #TODO (nathan) add this
-    return np.array([0, 0, 0])
+
+    x1 = self._l1_length * math.cos(joint_angles[1])
+    z1 = self._l1_length * math.sin(joint_angles[1])
+
+    x2 = self._l2_length * math.cos(joint_angles[1] + joint_angles[2])
+    z2 = self._l2_length * math.sin(joint_angles[1] + joint_angles[2])
+
+    foot_pos = np.array([[self._hip_offset],
+                        [x1 + x2], 
+                        [z1 + z2]
+                        ])
+
+    rot_mat = np.array([[math.cos(-joint_angles[0]), -math.sin(-joint_angles[0]), 0],
+                        [math.sin(-joint_angles[0]), math.cos(-joint_angles[0]), 0],
+                        [0, 0, 1]
+                        ])  
+
+    end_effector_pos = np.matmul(rot_mat, foot_pos)
+
+    xyz = np.transpose(end_effector_pos)
+
+    return xyz[0]
 
   def _get_vector_from_end_effector_to_goal(self):
     if self._run_on_robot:
@@ -158,6 +187,7 @@ class ReacherEnv(gym.Env):
       end_effector_pos = self._bullet_client.getLinkState(bodyUniqueId=self.robot_id,
                                                linkIndex=end_effector_link_id,
                                                computeForwardKinematics=1)[0]
+      # print("end effector: ", end_effector_pos)
     return np.array(end_effector_pos) - np.array(self.target)
 
   def shutdown(self):

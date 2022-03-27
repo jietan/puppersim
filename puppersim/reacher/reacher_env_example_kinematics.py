@@ -71,7 +71,7 @@ def calculate_inverse_kinematics(end_effector_pos, guess):
 def run_example():
     env = reacher_env.ReacherEnv(run_on_robot=FLAGS.run_on_robot, render=True)
     env.reset()
-    env.setTarget([HIP_OFFSET, L1, L2])
+    env.setTarget([0.07, 0.07, 0.07])
     guess = np.array([0,0,0])
 
     env_step = 0
