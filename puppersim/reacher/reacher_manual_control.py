@@ -1,3 +1,4 @@
+import reacher_kinematics
 import pybullet as p
 import puppersim.data as pd
 import time
@@ -21,39 +22,41 @@ HIP_OFFSET = 0.0335
 L1 = 0.08
 L2 = 0.11
 
-def calculate_forward_kinematics_robot(joint_angles):
-  # compute end effector pos in cartesian cords given angles
+# def calculate_forward_kinematics_robot(joint_angles):
+#   # compute end effector pos in cartesian cords given angles
 
-  x1 = L1 * math.sin(joint_angles[1])
-  z1 = L1 * math.cos(joint_angles[1])
+#   x1 = L1 * math.sin(joint_angles[1])
+#   z1 = L1 * math.cos(joint_angles[1])
 
-  x2 = L2 * math.sin(joint_angles[1] + joint_angles[2])
-  z2 = L2 * math.cos(joint_angles[1] + joint_angles[2])
+#   x2 = L2 * math.sin(joint_angles[1] + joint_angles[2])
+#   z2 = L2 * math.cos(joint_angles[1] + joint_angles[2])
 
-  foot_pos = np.array([[HIP_OFFSET],
-                      [x1 + x2], 
-                      [z1 + z2]
-                      ])
+#   foot_pos = np.array([[HIP_OFFSET],
+#                       [x1 + x2], 
+#                       [z1 + z2]
+#                       ])
 
-  rot_mat = np.array([[math.cos(-joint_angles[0]), -math.sin(-joint_angles[0]), 0],
-                      [math.sin(-joint_angles[0]), math.cos(-joint_angles[0]), 0],
-                      [0, 0, 1]
-                      ])  
+#   rot_mat = np.array([[math.cos(-joint_angles[0]), -math.sin(-joint_angles[0]), 0],
+#                       [math.sin(-joint_angles[0]), math.cos(-joint_angles[0]), 0],
+#                       [0, 0, 1]
+#                       ])  
 
-  end_effector_pos = np.matmul(rot_mat, foot_pos)
+#   end_effector_pos = np.matmul(rot_mat, foot_pos)
 
-  xyz = np.transpose(end_effector_pos)
+#   xyz = np.transpose(end_effector_pos)
 
-  return xyz[0]
+#   return xyz[0]
 
 def main(argv):
   run_on_robot = FLAGS.run_on_robot
   p.connect(p.GUI)
+  p.configureDebugVisualizer(p.COV_ENABLE_RGB_BUFFER_PREVIEW, 0)
+  p.configureDebugVisualizer(p.COV_ENABLE_DEPTH_BUFFER_PREVIEW, 0)
+  p.configureDebugVisualizer(p.COV_ENABLE_SEGMENTATION_MARK_PREVIEW, 0)
   p.setAdditionalSearchPath(pybullet_data.getDataPath())
   URDF_PATH = pd.getDataPath() + "/pupper_arm.urdf"
   reacher = p.loadURDF(URDF_PATH, useFixedBase=True)
 
-  gravId = p.addUserDebugParameter("gravity", -10, 10, -10)
   jointIds = []
   paramIds = []
 
@@ -82,7 +85,6 @@ def main(argv):
   while (1):
     counter += 1
     joint_angles = [0, 0, 0]
-    p.setGravity(0, 0, p.readUserDebugParameter(gravId))
     for i in range(len(paramIds)):
       c = paramIds[i]
       targetPos = p.readUserDebugParameter(c)
@@ -98,7 +100,7 @@ def main(argv):
       hardware_interface.set_actuator_postions(np.array(full_actions))
 
     if counter % 100 == 0:
-      print(calculate_forward_kinematics_robot(joint_angles))
+      print(reacher_kinematics.calculate_forward_kinematics_robot(joint_angles))
     time.sleep(0.01)
 
 app.run(main)
