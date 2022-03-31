@@ -17,11 +17,11 @@ L2 = 0.11
 def calculate_forward_kinematics_robot(joint_angles):
     # compute end effector pos in cartesian cords given angles
 
-    x1 = L1 * math.cos(joint_angles[1])
-    z1 = L1 * math.sin(joint_angles[1])
+    x1 = L1 * math.sin(joint_angles[1])
+    z1 = L1 * math.cos(joint_angles[1])
 
-    x2 = L2 * math.cos(joint_angles[1] + joint_angles[2])
-    z2 = L2 * math.sin(joint_angles[1] + joint_angles[2])
+    x2 = L2 * math.sin(joint_angles[1] + joint_angles[2])
+    z2 = L2 * math.cos(joint_angles[1] + joint_angles[2])
 
     foot_pos = np.array([[HIP_OFFSET],
                         [x1 + x2], 
@@ -47,7 +47,7 @@ def calculate_inverse_kinematics(end_effector_pos, guess):
     lmbda = 10
     cost = ik_cost(end_effector_pos, guess)
     iters = 0
-    while cost > 1e-6:
+    while cost > 1e-6 and iters < 100:
         iters += 1
         J = np.zeros((3, 3))
         for i in range(3):
@@ -57,7 +57,8 @@ def calculate_inverse_kinematics(end_effector_pos, guess):
                 p2[j] += h
                 J[i, j] = (calculate_forward_kinematics_robot(p2)[i] - calculate_forward_kinematics_robot(guess)[i]) / h
         dif = np.reshape(calculate_forward_kinematics_robot(guess) - end_effector_pos, (3,1))
-        cost_gradient = np.matmul(J, dif)
+        J_t = np.transpose(J)
+        cost_gradient = np.matmul(J_t, dif)
         guess = np.reshape(guess, (3,1)) - lmbda * cost_gradient
         cost = ik_cost(end_effector_pos, guess)
         if iters % 100 == 0:
@@ -71,8 +72,8 @@ def calculate_inverse_kinematics(end_effector_pos, guess):
 def run_example():
     env = reacher_env.ReacherEnv(run_on_robot=FLAGS.run_on_robot, render=True)
     env.reset()
-    env.setTarget([0.07, 0.07, 0.07])
-    guess = np.array([0,0,0])
+    env.setTarget([0.0, 0.0, 0.15])
+    guess = [0,0,0]
 
     env_step = 0
     cumulative_reward = 0
@@ -80,8 +81,9 @@ def run_example():
         env_step += 1
         time.sleep(0.002)
         desired_end_effector_pos = env.target
+        print("g", guess)
         guess = calculate_inverse_kinematics(desired_end_effector_pos, guess)
-        obs, reward, done, _ = env.step(actions=np.array([0., 0., 0.]))
+        obs, reward, done, _ = env.step(actions=guess)
         cumulative_reward += reward
         print("obs: ", obs)
         print("reward: ", cumulative_reward)

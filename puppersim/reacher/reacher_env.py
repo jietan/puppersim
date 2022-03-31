@@ -11,7 +11,7 @@ from serial.tools import list_ports
 
 KP = 4.0
 KD = 4.0
-MAX_CURRENT = 2.0
+MAX_CURRENT = 4.0
 
 
 class ReacherEnv(gym.Env):
@@ -30,7 +30,9 @@ class ReacherEnv(gym.Env):
     self._l1_length = 0.08
     self._l2_length = 0.11
 
-    # self.target = np.random.uniform(0.5, 0.1, 3)
+    self._second_arm_position = np.array([0., 0., 0.])
+
+    # self.target = np.random.uniform(0.05, 0.1, 3)
     self.target = np.array([0.07, 0.07, 0.07])
 
     self._run_on_robot = run_on_robot
@@ -65,8 +67,8 @@ class ReacherEnv(gym.Env):
                                        controlMode=self._bullet_client.POSITION_CONTROL,
                                        targetVelocity=0,
                                        force=0)
-    # self.target = np.random.uniform(0.5, 0.1, 3)
-    self.target = np.array([0.07, 0.07, 0.07])
+    self.target = np.random.uniform(0.05, 0.1, 3)
+    # self.target = np.array([0.07, 0.07, 0.07])
     # target_angles = np.random.uniform(-0.05*math.pi, 0.05*math.pi, 3)
     # self.target = self._forward_kinematics(target_angles)
 
@@ -98,7 +100,10 @@ class ReacherEnv(gym.Env):
 
   def _apply_actions_on_robot(self, actions):
     full_actions = np.zeros([3, 4])
-    full_actions[:, 2] = np.array(actions)
+    full_actions[:, 2] = np.reshape(actions, 3)
+    # angles of 0.07 xyz pos
+    # full_actions[:, 3] = np.array([0.45964363870803093, -0.08790801810806273, -1.6859103980225414])
+    # 0.4346071801821101, -0.49672970266324507, 1.8859455947731416
     self._hardware_interface.set_joint_space_parameters(kp=KP,
                                                         kd=KD,
                                                         max_current=MAX_CURRENT)
@@ -108,6 +113,7 @@ class ReacherEnv(gym.Env):
     joint_states = self._bullet_client.getJointStates(self.robot_id,
                                            list(range(self.num_joints)))
     joint_angles = [joint_data[0] for joint_data in joint_states][0:3]
+    print("joint angles", joint_angles)
     joint_velocities = [joint_data[1] for joint_data in joint_states][0:3]
     # return np.array(self.target)
     return np.concatenate([
@@ -124,6 +130,13 @@ class ReacherEnv(gym.Env):
 
     joint_angles = self._robot_state.position[6:9]
     joint_velocities = self._robot_state.velocity[6:9]
+    # self._second_arm_position = self._robot_state.position[9:12]
+    # print("joint angles", joint_angles)
+    # print("joint angles 2",  self._second_arm_position)
+    # self.target = self._forward_kinematics(self._second_arm_position)
+    # print("end effector: ", self.target)
+    np.set_printoptions(precision=2)
+    # print("second joint angles: ", self._second_arm_position)
     return np.concatenate([
         np.cos(joint_angles),
         np.sin(joint_angles),
@@ -141,6 +154,7 @@ class ReacherEnv(gym.Env):
       self._apply_actions(actions)
       ob = self._get_obs()
       self._bullet_client.stepSimulation()
+    # print("target", self.target)
 
     reward_dist = -np.linalg.norm(self._get_vector_from_end_effector_to_goal())
     reward_ctrl = 0
@@ -159,11 +173,11 @@ class ReacherEnv(gym.Env):
 
   def _forward_kinematics(self, joint_angles):
 
-    x1 = self._l1_length * math.cos(joint_angles[1])
-    z1 = self._l1_length * math.sin(joint_angles[1])
+    x1 = self._l1_length * math.sin(joint_angles[1])
+    z1 = self._l1_length * math.cos(joint_angles[1])
 
-    x2 = self._l2_length * math.cos(joint_angles[1] + joint_angles[2])
-    z2 = self._l2_length * math.sin(joint_angles[1] + joint_angles[2])
+    x2 = self._l2_length * math.sin(joint_angles[1] + joint_angles[2])
+    z2 = self._l2_length * math.cos(joint_angles[1] + joint_angles[2])
 
     foot_pos = np.array([[self._hip_offset],
                         [x1 + x2], 
