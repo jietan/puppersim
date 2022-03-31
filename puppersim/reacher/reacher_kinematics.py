@@ -38,10 +38,10 @@ def ik_cost(end_effector_pos, guess):
 
 def calculate_inverse_kinematics(end_effector_pos, guess):
     # compute joint angles given a desired end effector position
-    lmbda = 1
+    lmbda = 10
     cost = ik_cost(end_effector_pos, guess)
     iters = 0
-    while cost > 1e-6 and iters < 500:
+    while cost > 1e-6 and iters < 100:
         iters += 1
         J = np.zeros((3, 3))
         for i in range(3):

@@ -1,6 +1,7 @@
 import pybullet
 import puppersim.data as pd
 from pybullet_utils import bullet_client
+from reacher_kinematics import calculate_forward_kinematics_robot
 import time
 import math
 import gym
@@ -100,7 +101,7 @@ class ReacherEnv(gym.Env):
   def _apply_actions_on_robot(self, actions):
     full_actions = np.zeros([3, 4])
     full_actions[:, 2] = np.reshape(actions, 3)
-    
+
     self._hardware_interface.set_joint_space_parameters(kp=KP,
                                                         kd=KD,
                                                         max_current=MAX_CURRENT)
@@ -160,34 +161,10 @@ class ReacherEnv(gym.Env):
         return joint_id
     raise ValueError("leftFrontToe not found")
 
-  def _forward_kinematics(self, joint_angles):
-
-    x1 = self._l1_length * math.sin(joint_angles[1])
-    z1 = self._l1_length * math.cos(joint_angles[1])
-
-    x2 = self._l2_length * math.sin(joint_angles[1] + joint_angles[2])
-    z2 = self._l2_length * math.cos(joint_angles[1] + joint_angles[2])
-
-    foot_pos = np.array([[self._hip_offset],
-                        [x1 + x2], 
-                        [z1 + z2]
-                        ])
-
-    rot_mat = np.array([[math.cos(-joint_angles[0]), -math.sin(-joint_angles[0]), 0],
-                        [math.sin(-joint_angles[0]), math.cos(-joint_angles[0]), 0],
-                        [0, 0, 1]
-                        ])  
-
-    end_effector_pos = np.matmul(rot_mat, foot_pos)
-
-    xyz = np.transpose(end_effector_pos)
-
-    return xyz[0]
-
   def _get_vector_from_end_effector_to_goal(self):
     if self._run_on_robot:
       joint_angles = self._robot_state.position[6:9]
-      end_effector_pos = self._forward_kinematics(joint_angles)
+      end_effector_pos = calculate_forward_kinematics_robot(joint_angles)
     else:
       end_effector_link_id = self._get_end_effector_link_id()
       end_effector_pos = self._bullet_client.getLinkState(bodyUniqueId=self.robot_id,
