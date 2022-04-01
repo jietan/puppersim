@@ -1,6 +1,5 @@
 import reacher_env
 from puppersim.reacher import reacher_kinematics
-from puppersim.reacher import calculate_inverse_kinematics
 import math
 import time
 import numpy as np
@@ -24,7 +23,7 @@ def run_example():
         time.sleep(0.002)
         desired_end_effector_pos = env.target
         print("g", guess)
-        guess = calculate_inverse_kinematics(desired_end_effector_pos, guess)
+        guess = reacher_kinematics.calculate_inverse_kinematics(desired_end_effector_pos, guess)
         obs, reward, done, _ = env.step(actions=guess)
         cumulative_reward += reward
         print("obs: ", obs)

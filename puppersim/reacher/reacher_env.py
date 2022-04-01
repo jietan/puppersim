@@ -1,7 +1,7 @@
 import pybullet
 import puppersim.data as pd
 from pybullet_utils import bullet_client
-from reacher_kinematics import calculate_forward_kinematics_robot
+from puppersim.reacher import reacher_kinematics
 import time
 import math
 import gym
@@ -163,7 +163,7 @@ class ReacherEnv(gym.Env):
   def _get_vector_from_end_effector_to_goal(self):
     if self._run_on_robot:
       joint_angles = self._robot_state.position[6:9]
-      end_effector_pos = calculate_forward_kinematics_robot(joint_angles)
+      end_effector_pos = reacher_kinematics.calculate_forward_kinematics_robot(joint_angles)
     else:
       end_effector_link_id = self._get_end_effector_link_id()
       end_effector_pos = self._bullet_client.getLinkState(bodyUniqueId=self.robot_id,
