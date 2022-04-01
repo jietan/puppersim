@@ -15,13 +15,17 @@ def run_example():
   env.setTarget([0.1, 0.1, 0.1])
 
   try:
+    env_step = 0
     while True:
-      #angles = env.calculateInverseKinematics(env.target)
+      env_step += 1
       time.sleep(0.005)
-      angles = [0, 0.2 * math.sin(time.time() * 2), 0]
+      angles = [0, 0, math.sin(2*time.time())]
       obs, reward, done, _ = env.step(actions=angles)
+      if env_step > 1000:
+        env.reset()
+        env_step = 0
       print("obs: ", obs)
-      #print("reward: ", reward)
+      print("reward: ", reward)
   finally:
     env.shutdown()
 
