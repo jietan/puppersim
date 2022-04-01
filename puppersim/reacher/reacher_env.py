@@ -28,10 +28,6 @@ class ReacherEnv(gym.Env):
         np.array([1, 1, 1, 1, 1, 1, 0.1, 0.1, 0.1, 0.3, 0.3, 0.3]),
         dtype=np.float32)
 
-    self._hip_offset = 0.0335
-    self._l1_length = 0.08
-    self._l2_length = 0.11
-
     self._second_arm_position = np.array([0., 0., 0.])
 
     self.target = np.random.uniform(0.05, 0.1, 3)

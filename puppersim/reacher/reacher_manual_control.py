@@ -68,7 +68,7 @@ def main(argv):
       c = paramIds[i]
       targetPos = p.readUserDebugParameter(c)
       joint_angles[i] = targetPos
-      p.setJointMotorControl2(reacher, jointIds[i], p.POSITION_CONTROL, targetPos, force=2 * 240.)
+      p.setJointMotorControl2(reacher, jointIds[i], p.POSITION_CONTROL, targetPos, force=2.)
 
     if run_on_robot:
       full_actions = np.zeros([3, 4])
