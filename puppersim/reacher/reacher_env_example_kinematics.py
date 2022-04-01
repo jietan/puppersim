@@ -1,6 +1,6 @@
 import reacher_env
-from reacher_kinematics import calculate_forward_kinematics_robot
-from reacher_kinematics import calculate_inverse_kinematics
+from puppersim.reacher import reacher_kinematics
+from puppersim.reacher import calculate_inverse_kinematics
 import math
 import time
 import numpy as np

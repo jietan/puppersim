@@ -9,6 +9,7 @@ import numpy as np
 import random
 from pupper_hardware_interface import interface
 from serial.tools import list_ports
+from sys import platform
 
 KP = 4.0
 KD = 4.0
@@ -37,8 +38,10 @@ class ReacherEnv(gym.Env):
 
     self._run_on_robot = run_on_robot
     if self._run_on_robot:
-      # serial_port = next(list_ports.grep(".*ttyACM0.*")).device
-      serial_port = next(list_ports.grep("usbmodem")).device
+      if platform == "linux" or platform == "linux2":
+        serial_port = next(list_ports.grep(".*ttyACM0.*")).device
+      elif platform == "darwin":
+        serial_port = next(list_ports.grep("usbmodem")).device
       self._hardware_interface = interface.Interface(serial_port)
       time.sleep(0.25)
       self._hardware_interface.set_joint_space_parameters(

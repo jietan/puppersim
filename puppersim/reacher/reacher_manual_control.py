@@ -1,4 +1,4 @@
-import reacher_kinematics
+from puppersim.reacher import reacher_kinematics
 import pybullet as p
 import puppersim.data as pd
 import time
@@ -9,6 +9,7 @@ from absl import flags
 import copy
 from pupper_hardware_interface import interface
 from serial.tools import list_ports
+from sys import platform
 
 flags.DEFINE_bool("run_on_robot", False, "Whether to run on robot or in simulation.")
 FLAGS = flags.FLAGS
@@ -21,31 +22,6 @@ MAX_CURRENT = 16.0
 HIP_OFFSET = 0.0335
 L1 = 0.08
 L2 = 0.11
-
-# def calculate_forward_kinematics_robot(joint_angles):
-#   # compute end effector pos in cartesian cords given angles
-
-#   x1 = L1 * math.sin(joint_angles[1])
-#   z1 = L1 * math.cos(joint_angles[1])
-
-#   x2 = L2 * math.sin(joint_angles[1] + joint_angles[2])
-#   z2 = L2 * math.cos(joint_angles[1] + joint_angles[2])
-
-#   foot_pos = np.array([[HIP_OFFSET],
-#                       [x1 + x2], 
-#                       [z1 + z2]
-#                       ])
-
-#   rot_mat = np.array([[math.cos(-joint_angles[0]), -math.sin(-joint_angles[0]), 0],
-#                       [math.sin(-joint_angles[0]), math.cos(-joint_angles[0]), 0],
-#                       [0, 0, 1]
-#                       ])  
-
-#   end_effector_pos = np.matmul(rot_mat, foot_pos)
-
-#   xyz = np.transpose(end_effector_pos)
-
-#   return xyz[0]
 
 def main(argv):
   run_on_robot = FLAGS.run_on_robot
@@ -71,10 +47,13 @@ def main(argv):
     jointType = info[2]
     if (jointType == p.JOINT_PRISMATIC or jointType == p.JOINT_REVOLUTE):
       jointIds.append(j)
-      paramIds.append(p.addUserDebugParameter(jointName.decode("utf-8"), -4, 4, 0))
+      paramIds.append(p.addUserDebugParameter(jointName.decode("utf-8"), -math.pi, math.pi, 0))
 
   if run_on_robot:
-    serial_port = next(list_ports.grep("usbmodem")).device
+    if platform == "linux" or platform == "linux2":
+      serial_port = next(list_ports.grep(".*ttyACM0.*")).device
+    elif platform == "darwin":
+      serial_port = next(list_ports.grep("usbmodem")).device
     hardware_interface = interface.Interface(serial_port)
     time.sleep(0.25)
     hardware_interface.set_joint_space_parameters(
@@ -89,7 +68,7 @@ def main(argv):
       c = paramIds[i]
       targetPos = p.readUserDebugParameter(c)
       joint_angles[i] = targetPos
-      p.setJointMotorControl2(reacher, jointIds[i], p.POSITION_CONTROL, targetPos, force=5 * 240.)
+      p.setJointMotorControl2(reacher, jointIds[i], p.POSITION_CONTROL, targetPos, force=2 * 240.)
 
     if run_on_robot:
       full_actions = np.zeros([3, 4])
@@ -99,7 +78,7 @@ def main(argv):
                                                     max_current=MAX_CURRENT)
       hardware_interface.set_actuator_postions(np.array(full_actions))
 
-    if counter % 100 == 0:
+    if counter % 5 == 0:
       print(reacher_kinematics.calculate_forward_kinematics_robot(joint_angles))
     time.sleep(0.01)
 
