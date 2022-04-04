@@ -30,6 +30,8 @@ def main(argv):
   p.configureDebugVisualizer(p.COV_ENABLE_DEPTH_BUFFER_PREVIEW, 0)
   p.configureDebugVisualizer(p.COV_ENABLE_SEGMENTATION_MARK_PREVIEW, 0)
   p.setAdditionalSearchPath(pybullet_data.getDataPath())
+  p.resetDebugVisualizerCamera(cameraDistance=0.3, cameraYaw=-134, cameraPitch=-30, cameraTargetPosition=[0,0,0.1])
+  
   URDF_PATH = pd.getDataPath() + "/pupper_arm.urdf"
   reacher = p.loadURDF(URDF_PATH, useFixedBase=True)
 
