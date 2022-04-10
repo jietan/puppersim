@@ -11,8 +11,8 @@ from pupper_hardware_interface import interface
 from serial.tools import list_ports
 from sys import platform
 
-KP = 4.0
-KD = 4.0
+KP = 6.0
+KD = 1.0
 MAX_CURRENT = 4.0
 
 
@@ -24,8 +24,11 @@ class ReacherEnv(gym.Env):
         np.array([0.9*math.pi, 0.8*math.pi, math.pi]),
         dtype=np.float32)
     self.observation_space = gym.spaces.Box(
-        np.array([-1, -1, -1, -1, -1, -1, 0.05, 0.05, 0.05, -0.3, -0.3, -0.3]),
-        np.array([1, 1, 1, 1, 1, 1, 0.1, 0.1, 0.1, 0.3, 0.3, 0.3]),
+        # np.array([-1, -1, -1, -1, -1, -1, 0.05, 0.05, 0.05, -0.3, -0.3, -0.3]),
+        # np.array([1, 1, 1, 1, 1, 1, 0.1, 0.1, 0.1, 0.3, 0.3, 0.3]),
+        # observation space range for target
+        np.array([-0.1, -0.1, 0.05]),
+        np.array([0.1, 0.1, 0.15]),
         dtype=np.float32)
 
     self._second_arm_position = np.array([0., 0., 0.])
@@ -66,7 +69,11 @@ class ReacherEnv(gym.Env):
                                        controlMode=self._bullet_client.POSITION_CONTROL,
                                        targetVelocity=0,
                                        force=0)
-    self.target = np.random.uniform(0.05, 0.1, 3)
+
+    # self.target = np.random.uniform(0.05, 0.10, 3)
+    # Target position: xy range of -0.1 to 0.1. z range of 0.05 to 0.15.
+    self.target = np.concatenate([np.random.uniform(-0.1, 0.1, 2), np.random.uniform(0.05, 0.15, 1)])
+    print("Target: ", self.target)
     # self.target = np.array([0.07, 0.07, 0.07])
     # target_angles = np.random.uniform(-0.05*math.pi, 0.05*math.pi, 3)
     # self.target = self._forward_kinematics(target_angles)
@@ -94,8 +101,7 @@ class ReacherEnv(gym.Env):
       self._bullet_client.setJointMotorControl2(bodyIndex=self.robot_id,
                                      jointIndex=joint_id,
                                      controlMode=pybullet.POSITION_CONTROL,
-                                     targetPosition=action)
-                                     
+                                     targetPosition=action)                                
 
   def _apply_actions_on_robot(self, actions):
     full_actions = np.zeros([3, 4])
@@ -110,15 +116,15 @@ class ReacherEnv(gym.Env):
     joint_states = self._bullet_client.getJointStates(self.robot_id,
                                            list(range(self.num_joints)))
     joint_angles = [joint_data[0] for joint_data in joint_states][0:3]
-    print("joint angles", joint_angles)
+    # print("joint angles", joint_angles)
     joint_velocities = [joint_data[1] for joint_data in joint_states][0:3]
     # return np.array(self.target)
     return np.concatenate([
-        np.cos(joint_angles),
-        np.sin(joint_angles),
+        # np.cos(joint_angles),
+        # np.sin(joint_angles),
         self.target,
         # joint_velocities,
-        self._get_vector_from_end_effector_to_goal(),
+        # self._get_vector_from_end_effector_to_goal(),
     ])
 
   def _get_obs_on_robot(self):
@@ -128,11 +134,11 @@ class ReacherEnv(gym.Env):
     joint_velocities = self._robot_state.velocity[6:9]
     np.set_printoptions(precision=2)
     return np.concatenate([
-        np.cos(joint_angles),
-        np.sin(joint_angles),
+        # np.cos(joint_angles),
+        # np.sin(joint_angles),
         self.target,
         # joint_velocities,
-        self._get_vector_from_end_effector_to_goal(),
+        # self._get_vector_from_end_effector_to_goal(),
     ])
 
   def step(self, actions):
