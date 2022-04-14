@@ -2,7 +2,6 @@ from puppersim.reacher import reacher_env
 import math
 import time
 import numpy as np
-import copy
 
 HIP_OFFSET = 0.0335
 L1 = 0.08
@@ -10,8 +9,14 @@ L2 = 0.11
 
 
 def calculate_forward_kinematics_robot(joint_angles):
-  # compute end effector pos in cartesian cords given angles
-  # joint_angles = np.reshape(joint_angles, (3,))
+  """Compute end effector pos in cartesian cords given angles
+
+  Args:
+    joint_angles: np array with elements (base, shoulder, elbow). Radians
+  
+  Returns:
+    Position of end-effector in meters, np array (x, y, z)
+  """
 
   x1 = L1 * math.sin(joint_angles[1])
   z1 = L1 * math.cos(joint_angles[1])
@@ -26,11 +31,8 @@ def calculate_forward_kinematics_robot(joint_angles):
        [math.sin(-joint_angles[0]),
         math.cos(-joint_angles[0]), 0], [0, 0, 1]])
 
-  end_effector_pos = np.matmul(rot_mat, foot_pos)
-
-  xyz = np.transpose(end_effector_pos)
-
-  return xyz[0]
+  end_effector_pos = rot_mat @ foot_pos
+  return end_effector_pos[:,0]
 
 
 def ik_cost(end_effector_pos, guess):
