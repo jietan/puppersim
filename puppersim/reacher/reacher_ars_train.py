@@ -494,7 +494,7 @@ if __name__ == '__main__':
     parser.add_argument('--filter', type=str, default='NoFilter')
     parser.add_argument('--activation', type=str, help="Neural network policy activation function, tanh or clip", default="tanh")
 
-    parser.add_argument('--policy_network_size', action='store', dest='policy_network_size_list',type=str, nargs='*', default='64,64')   
+    parser.add_argument('--policy_network_size', action='store', dest='policy_network_size_list',type=str, nargs='*', default='32,32')   
     args = parser.parse_args() 
     params = vars(args)
 
