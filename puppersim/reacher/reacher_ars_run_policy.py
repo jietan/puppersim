@@ -31,7 +31,9 @@ import puppersim.data as pd
 import reacher_env
 
 def create_reacher_env(args):
-  env = reacher_env.ReacherEnv(run_on_robot=args.run_on_robot, render=args.render)
+  env = reacher_env.ReacherEnv(run_on_robot=args.run_on_robot, 
+                               render=args.render, 
+                               render_meshes=args.render_meshes)
 
   return env
 
@@ -50,6 +52,8 @@ def main(argv):
   parser.add_argument('--plot', default=False, action='store_true', help='whether to plot action and observation histories after running the policy.')
   parser.add_argument("--log_to_file", default=False, action='store_true', help="Whether to log data to the disk.")
   parser.add_argument("--realtime", default=False, action='store_true', help="Run at realtime.")
+  parser.add_argument("--render_meshes", default=False, action='store_true', help="Whether to render robot meshes.")
+  
   if len(argv):
     args = parser.parse_args(argv)
   else:

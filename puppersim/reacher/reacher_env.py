@@ -10,7 +10,7 @@ import numpy as np
 import random
 from pupper_hardware_interface import interface
 from serial.tools import list_ports
-from sys import platform
+import os
 
 KP = 6.0
 KD = 1.0
@@ -18,7 +18,7 @@ MAX_CURRENT = 4.0
 
 class ReacherEnv(gym.Env):
 
-  def __init__(self, run_on_robot=False, render=False):
+  def __init__(self, run_on_robot=False, render=False, render_meshes=False):
     self.action_space = gym.spaces.Box(
         np.array([-0.9*math.pi, -0.8*math.pi, -math.pi]),
         np.array([0.9*math.pi, 0.8*math.pi, math.pi]),
@@ -33,7 +33,7 @@ class ReacherEnv(gym.Env):
 
     self._second_arm_position = np.array([0., 0., 0.])
 
-    self.target = np.random.uniform(0.05, 0.1, 3)
+    self.target = np.array([0, 0, 0.1])
 
     self._run_on_robot = run_on_robot
     if self._run_on_robot:
@@ -50,12 +50,17 @@ class ReacherEnv(gym.Env):
       else:
         self._bullet_client = bullet_client.BulletClient(connection_mode=pybullet.DIRECT)
 
+    if render_meshes:
+      self.urdf_filename = "pupper_arm.urdf"
+    else:
+      self.urdf_filename = "pupper_arm_no_mesh.urdf"
+
   def reset(self):
     if self._run_on_robot:
       return self._get_obs_on_robot()
     else:
       self._bullet_client.resetSimulation()
-      URDF_PATH = pd.getDataPath() + "/pupper_arm.urdf"
+      URDF_PATH = os.path.join(pd.getDataPath(), self.urdf_filename)
       self.robot_id = self._bullet_client.loadURDF(URDF_PATH, useFixedBase=True)
       self._bullet_client.setGravity(0, 0, -9.8)
       self.num_joints = self._bullet_client.getNumJoints(self.robot_id)
