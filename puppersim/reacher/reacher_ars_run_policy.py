@@ -49,7 +49,7 @@ def main(argv):
   parser.add_argument('--profile', default=False, action='store_true', help='whether to print timing for parts of the code. Default is False.')
   parser.add_argument('--plot', default=False, action='store_true', help='whether to plot action and observation histories after running the policy.')
   parser.add_argument("--log_to_file", default=False, action='store_true', help="Whether to log data to the disk.")
-  parser.add_argument("--realtime", default=False, help="Run at realtime.")
+  parser.add_argument("--realtime", default=False, action='store_true', help="Run at realtime.")
   if len(argv):
     args = parser.parse_args(argv)
   else:
