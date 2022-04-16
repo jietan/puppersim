@@ -1,4 +1,5 @@
 from puppersim.reacher import reacher_kinematics
+from puppersim.reacher import reacher_robot_utils
 import pybullet as p
 import puppersim.data as pd
 import time
@@ -8,20 +9,23 @@ from absl import app
 from absl import flags
 import copy
 from pupper_hardware_interface import interface
-from serial.tools import list_ports
 from sys import platform
 
-flags.DEFINE_bool("run_on_robot", False, "Whether to run on robot or in simulation.")
+flags.DEFINE_bool("run_on_robot", False,
+                  "Whether to run on robot or in simulation.")
 FLAGS = flags.FLAGS
 import pybullet_data
 
-KP = 5.0
-KD = 2.0
-MAX_CURRENT = 3.0
+KP = 5.0  # Amps/rad
+KD = 2.0  # Amps/(rad/s)
+MAX_CURRENT = 3.0  # Amps
 
-HIP_OFFSET = 0.0335
-L1 = 0.08
-L2 = 0.11
+UPDATE_DT = 0.01  # seconds
+
+HIP_OFFSET = 0.0335  # meters
+L1 = 0.08  # meters
+L2 = 0.11  # meters
+
 
 def load_reacher():
   p.connect(p.GUI)
@@ -29,23 +33,22 @@ def load_reacher():
   p.configureDebugVisualizer(p.COV_ENABLE_DEPTH_BUFFER_PREVIEW, 0)
   p.configureDebugVisualizer(p.COV_ENABLE_SEGMENTATION_MARK_PREVIEW, 0)
   p.setAdditionalSearchPath(pybullet_data.getDataPath())
-  p.resetDebugVisualizerCamera(cameraDistance=0.3, cameraYaw=-134, cameraPitch=-30, cameraTargetPosition=[0,0,0.1])
-  
+  p.resetDebugVisualizerCamera(cameraDistance=0.3,
+                               cameraYaw=-134,
+                               cameraPitch=-30,
+                               cameraTargetPosition=[0, 0, 0.1])
+
   URDF_PATH = pd.getDataPath() + "/pupper_arm.urdf"
   return p.loadURDF(URDF_PATH, useFixedBase=True)
 
-def get_serial_port():
-  for device in list_ports.grep(".*"):
-    if device.manufacturer == "Teensyduino":
-      return device.device
 
 def main(argv):
   run_on_robot = FLAGS.run_on_robot
   reacher = load_reacher()
   target_visual_shape = p.createVisualShape(p.GEOM_SPHERE, radius=0.015)
-  target_position = np.array([0,0,0])
-  sphere_id = p.createMultiBody(baseVisualShapeIndex=target_visual_shape, basePosition=target_position)
-  
+  sphere_id = p.createMultiBody(baseVisualShapeIndex=target_visual_shape,
+                                basePosition=np.array([0, 0, 0]))
+
   joint_ids = []
   param_ids = []
 
@@ -59,14 +62,17 @@ def main(argv):
     jointType = info[2]
     if (jointType == p.JOINT_PRISMATIC or jointType == p.JOINT_REVOLUTE):
       joint_ids.append(j)
-      param_ids.append(p.addUserDebugParameter(jointName.decode("utf-8"), -math.pi, math.pi, 0))
+      param_ids.append(
+          p.addUserDebugParameter(jointName.decode("utf-8"), -math.pi, math.pi,
+                                  0))
 
   if run_on_robot:
-    serial_port = get_serial_port()
+    serial_port = reacher_robot_utils.get_serial_port()
     hardware_interface = interface.Interface(serial_port)
     time.sleep(0.25)
-    hardware_interface.set_joint_space_parameters(
-        kp=KP, kd=KD, max_current=MAX_CURRENT)
+    hardware_interface.set_joint_space_parameters(kp=KP,
+                                                  kd=KD,
+                                                  max_current=MAX_CURRENT)
 
   p.setRealTimeSimulation(1)
   counter = 0
@@ -83,7 +89,8 @@ def main(argv):
     if run_on_robot:
       hardware_interface.read_incoming_data()
 
-    if time.time() - last_command > 0.01:
+    if time.time() - last_command > UPDATE_DT:
+      print(time.time() - last_command)
       last_command = time.time()
       counter += 1
       joint_angles = np.zeros(3)
@@ -91,20 +98,29 @@ def main(argv):
         c = param_ids[i]
         targetPos = p.readUserDebugParameter(c)
         joint_angles[i] = targetPos
-        p.setJointMotorControl2(reacher, joint_ids[i], p.POSITION_CONTROL, targetPos, force=2.)
+        p.setJointMotorControl2(reacher,
+                                joint_ids[i],
+                                p.POSITION_CONTROL,
+                                targetPos,
+                                force=2.)
 
       if run_on_robot:
         full_actions = np.zeros([3, 4])
         full_actions[:, 3] = np.reshape(joint_angles, 3)
 
         hardware_interface.set_actuator_postions(np.array(full_actions))
-        # Actuator positions are stored in array: hardware_interface.robot_state.position, 
+        # Actuator positions are stored in array: hardware_interface.robot_state.position,
         # Actuator velocities are stored in array: hardware_interface.robot_state.velocity
 
-      end_effector_pos = reacher_kinematics.calculate_forward_kinematics_robot(joint_angles)
-      p.resetBasePositionAndOrientation(sphere_id, posObj=end_effector_pos, ornObj=[0, 0, 0, 1])
-      
+      end_effector_pos = reacher_kinematics.calculate_forward_kinematics_robot(
+          joint_angles)
+      p.resetBasePositionAndOrientation(sphere_id,
+                                        posObj=end_effector_pos,
+                                        ornObj=[0, 0, 0, 1])
+
       if counter % 5 == 0:
-        print(reacher_kinematics.calculate_forward_kinematics_robot(joint_angles))
+        print(
+            reacher_kinematics.calculate_forward_kinematics_robot(joint_angles))
+
 
 app.run(main)
