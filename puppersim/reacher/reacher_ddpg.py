@@ -235,7 +235,7 @@ def ddpg(
     test_env: gym.Env,
     buffer: ReplayBuffer,
     num_steps: int = 1_000_000,
-    transitions_per_step: int = 5,
+    transitions_per_step: int = 1,
     max_episode_steps: int = 100_000,
     batch_size: int = 256,
     tau: float = 0.005,
@@ -249,6 +249,9 @@ def ddpg(
     name: str = "ddpg_run",
     gradient_updates_per_step: int = 1,
     infinite_bootstrap: bool = True,
+    return_best_score=False,
+    render=True,
+    verbosity=1,
 ) -> Agent:
     """
     Train `agent` on `train_env` with the Deep Deterministic Policy Gradient algorithm,
@@ -276,7 +279,10 @@ def ddpg(
 
     done = True
 
-    for step in tqdm.tqdm(range(num_steps)):
+    train_iter = range(num_steps)
+    if verbosity:
+        train_iter = tqdm.tqdm(train_iter)
+    for step in train_iter:
         for _ in range(transitions_per_step):
             # collect experience from the environment, sampling from
             # the current policy (with added noise for exploration)
@@ -327,15 +333,18 @@ def ddpg(
 
         if step % eval_interval == 0 or step == num_steps - 1:
             mean_return = evaluate_agent(
-                agent, test_env, eval_episodes, max_episode_steps, render=True,
+                agent, test_env, eval_episodes, max_episode_steps, render=render,
             )
-            print(f"Mean Return After {step} Steps: {mean_return:.2f}")
+            if verbosity:
+                print(f"Mean Return After {step} Steps: {mean_return:.2f}")
             if mean_return > best_return:
                 agent.save(save_dir)
                 best_return = mean_return
 
     # restore best saved agent
     agent.load(save_dir)
+    if return_best_score:
+        return agent, best_return
     return agent
 
 
@@ -431,6 +440,7 @@ if __name__ == "__main__":
         name=args.name,
         max_episode_steps=args.max_episode_steps,
         exploration_anneal=args.train_steps // 2,
+        render=False,
     )
 
     final_eval = evaluate_agent(
