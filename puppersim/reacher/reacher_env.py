@@ -2,6 +2,7 @@ import pybullet
 import puppersim.data as pd
 from pybullet_utils import bullet_client
 from puppersim.reacher import reacher_kinematics
+from puppersim.reacher import reacher_robot_utils
 import time
 import math
 import gym
@@ -14,11 +15,6 @@ from sys import platform
 KP = 6.0
 KD = 1.0
 MAX_CURRENT = 4.0
-
-def get_serial_port():
-  for device in list_ports.grep(".*"):
-    if device.manufacturer == "Teensyduino":
-      return device
 
 class ReacherEnv(gym.Env):
 
@@ -41,7 +37,7 @@ class ReacherEnv(gym.Env):
 
     self._run_on_robot = run_on_robot
     if self._run_on_robot:
-      serial_port = get_serial_port()
+      serial_port = reacher_robot_utils.get_serial_port()
       self._hardware_interface = interface.Interface(serial_port)
       time.sleep(0.25)
       self._hardware_interface.set_joint_space_parameters(
