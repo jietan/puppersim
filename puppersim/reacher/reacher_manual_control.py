@@ -15,9 +15,9 @@ flags.DEFINE_bool("run_on_robot", False, "Whether to run on robot or in simulati
 FLAGS = flags.FLAGS
 import pybullet_data
 
-KP = 10.0
+KP = 5.0
 KD = 2.0
-MAX_CURRENT = 16.0
+MAX_CURRENT = 3.0
 
 HIP_OFFSET = 0.0335
 L1 = 0.08
@@ -37,7 +37,7 @@ def load_reacher():
 def get_serial_port():
   for device in list_ports.grep(".*"):
     if device.manufacturer == "Teensyduino":
-      return device
+      return device.device
 
 def main(argv):
   run_on_robot = FLAGS.run_on_robot
@@ -95,7 +95,7 @@ def main(argv):
 
       if run_on_robot:
         full_actions = np.zeros([3, 4])
-        full_actions[:, 2] = np.reshape(joint_angles, 3)
+        full_actions[:, 3] = np.reshape(joint_angles, 3)
 
         hardware_interface.set_actuator_postions(np.array(full_actions))
         # Actuator positions are stored in array: hardware_interface.robot_state.position, 
