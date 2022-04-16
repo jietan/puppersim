@@ -52,7 +52,7 @@ class DDPG_General(unittest.TestCase):
             eval_interval=2000,
             return_best_score=True,
             render=False,
-            verbosity=0,
+            verbosity=1,
         )
         self.assertTrue(best_return > -200.0)
 
@@ -78,7 +78,9 @@ class DDPG_Reacher(unittest.TestCase):
         )
 
     def test_ddpg_reacher_position(self):
-        self._setup(run_on_robot=False, render=False, torque_control=False)
+        self._setup(
+            run_on_robot=False, render=False, torque_control=False, torque_penalty=0.0
+        )
         ddpg(
             self.agent,
             self.train_env,
@@ -93,7 +95,9 @@ class DDPG_Reacher(unittest.TestCase):
         )
 
     def test_ddpg_reacher_torque(self):
-        self._setup(run_on_robot=False, render=False, torque_control=True)
+        self._setup(
+            run_on_robot=False, render=False, torque_control=True, torque_penalty=0.0
+        )
         ddpg(
             self.agent,
             self.train_env,
