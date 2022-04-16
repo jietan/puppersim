@@ -89,6 +89,16 @@ class Worker(object):
         #assert self.policy_params['type'] == 'linear'
         return self.policy.get_weights_plus_stats()
     
+    def multi_rollout(self, rollout_length=None, shift=0.0, number_rollouts=12):
+      average_reward = 0.0
+      total_steps = 0
+
+      for i in range(number_rollouts):
+        (total_reward, steps) = self.rollout(shift=shift, rollout_length=rollout_length)
+        average_reward += total_reward / number_rollouts
+        total_steps += steps
+      
+      return average_reward, total_steps
 
     def rollout(self, shift = 0., rollout_length = None):
         """ 
@@ -132,7 +142,8 @@ class Worker(object):
 
                 # for evaluation we do not shift the rewards (shift = 0) and we use the
                 # default rollout length (1000 for the MuJoCo locomotion tasks)
-                reward, r_steps = self.rollout(shift = 0., rollout_length = self.rollout_length)
+                # reward, r_steps = self.rollout(shift = 0., rollout_length = self.rollout_length)
+                reward, r_steps = self.multi_rollout(shift=0, rollout_length=self.rollout_length)
                 rollout_rewards.append(reward)
                 
             else:
@@ -146,11 +157,13 @@ class Worker(object):
 
                 # compute reward and number of timesteps used for positive perturbation rollout
                 self.policy.update_weights(w_policy + delta)
-                pos_reward, pos_steps  = self.rollout(shift = shift)
+                # pos_reward, pos_steps  = self.rollout(shift = shift)
+                pos_reward, pos_steps  = self.multi_rollout(shift = shift)
 
                 # compute reward and number of timesteps used for negative pertubation rollout
                 self.policy.update_weights(w_policy - delta)
-                neg_reward, neg_steps = self.rollout(shift = shift) 
+                # neg_reward, neg_steps = self.rollout(shift = shift) 
+                neg_reward, neg_steps = self.multi_rollout(shift = shift) 
                 steps += pos_steps + neg_steps
 
                 rollout_rewards.append([pos_reward, neg_reward])

@@ -20,8 +20,8 @@ class ReacherEnv(gym.Env):
 
   def __init__(self, run_on_robot=False, render=False, render_meshes=False):
     self.action_space = gym.spaces.Box(
-        np.array([-0.9*math.pi, -0.8*math.pi, -math.pi]),
-        np.array([0.9*math.pi, 0.8*math.pi, math.pi]),
+        np.array([-1.5*math.pi, -1.5*math.pi, -2*math.pi]),
+        np.array([1.5*math.pi, 1.5*math.pi, 2*math.pi]),
         dtype=np.float32)
     self.observation_space = gym.spaces.Box(
         # np.array([-1, -1, -1, -1, -1, -1, 0.05, 0.05, 0.05, -0.3, -0.3, -0.3]),
@@ -74,11 +74,18 @@ class ReacherEnv(gym.Env):
 
     # self.target = np.random.uniform(0.05, 0.10, 3)
     # Target position: xy range of -0.1 to 0.1. z range of 0.05 to 0.15.
-    self.target = np.concatenate([np.random.uniform(-0.1, 0.1, 2), np.random.uniform(0.05, 0.15, 1)])
-    print("Target: ", self.target)
+    # self.target = np.concatenate([np.random.uniform(-0.1, 0.1, 2), np.random.uniform(0.05, 0.15, 1)])
+    
+    possible_targets = []
+    possible_targets.append(np.array([-0.07, -0.07, 0.07]))
+    possible_targets.append(np.array([0.07, 0.07, 0.07]))
+    # possible_targets.append(np.array([-0.07, 0.07, 0.07]))
+    # possible_targets.append(np.array([0.07, -0.07, 0.07]))
+    self.target = random.choice(possible_targets)
+    
     # self.target = np.array([0.07, 0.07, 0.07])
-    # target_angles = np.random.uniform(-0.05*math.pi, 0.05*math.pi, 3)
-    # self.target = self._forward_kinematics(target_angles)
+    # target_angles = np.random.uniform(-0.5*math.pi, 0.5*math.pi, 3)
+    # self.target = reacher_kinematics.calculate_forward_kinematics_robot(target_angles)
 
     self._target_visual_shape = self._bullet_client.createVisualShape(self._bullet_client.GEOM_SPHERE, radius=0.015)
     self._target_visualization = self._bullet_client.createMultiBody(baseVisualShapeIndex=self._target_visual_shape, basePosition=self.target)
