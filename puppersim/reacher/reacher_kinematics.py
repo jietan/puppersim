@@ -17,19 +17,22 @@ def calculate_forward_kinematics_robot(joint_angles):
   Returns:
     Position of end-effector in meters, np array (x, y, z)
   """
+  base_angle = -joint_angles[0]
+  shoulder_angle = -joint_angles[1]
+  elbow_angle = -joint_angles[2]
 
-  x1 = L1 * math.sin(joint_angles[1])
-  z1 = L1 * math.cos(joint_angles[1])
+  y1 = L1 * math.sin(shoulder_angle)
+  z1 = L1 * math.cos(shoulder_angle)
 
-  x2 = L2 * math.sin(joint_angles[1] + joint_angles[2])
-  z2 = L2 * math.cos(joint_angles[1] + joint_angles[2])
+  y2 = L2 * math.sin(shoulder_angle + elbow_angle)
+  z2 = L2 * math.cos(shoulder_angle + elbow_angle)
 
-  foot_pos = np.array([[HIP_OFFSET], [x1 + x2], [z1 + z2]])
+  foot_pos = np.array([[HIP_OFFSET], [y1 + y2], [z1 + z2]])
 
   rot_mat = np.array(
-      [[math.cos(-joint_angles[0]), -math.sin(-joint_angles[0]), 0],
-       [math.sin(-joint_angles[0]),
-        math.cos(-joint_angles[0]), 0], [0, 0, 1]])
+      [[math.cos(base_angle), -math.sin(base_angle), 0],
+       [math.sin(base_angle),
+        math.cos(base_angle), 0], [0, 0, 1]])
 
   end_effector_pos = rot_mat @ foot_pos
   return end_effector_pos[:,0]

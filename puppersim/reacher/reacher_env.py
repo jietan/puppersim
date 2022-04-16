@@ -15,6 +15,10 @@ KP = 6.0
 KD = 1.0
 MAX_CURRENT = 4.0
 
+def get_serial_port():
+  for device in list_ports.grep(".*"):
+    if device.manufacturer == "Teensyduino":
+      return device
 
 class ReacherEnv(gym.Env):
 
@@ -37,10 +41,7 @@ class ReacherEnv(gym.Env):
 
     self._run_on_robot = run_on_robot
     if self._run_on_robot:
-      if platform == "linux" or platform == "linux2":
-        serial_port = next(list_ports.grep(".*ttyACM0.*")).device
-      elif platform == "darwin":
-        serial_port = next(list_ports.grep("usbmodem")).device
+      serial_port = get_serial_port()
       self._hardware_interface = interface.Interface(serial_port)
       time.sleep(0.25)
       self._hardware_interface.set_joint_space_parameters(
@@ -79,7 +80,6 @@ class ReacherEnv(gym.Env):
     # self.target = self._forward_kinematics(target_angles)
 
     self._target_visual_shape = self._bullet_client.createVisualShape(self._bullet_client.GEOM_SPHERE, radius=0.015)
-
     self._target_visualization = self._bullet_client.createMultiBody(baseVisualShapeIndex=self._target_visual_shape, basePosition=self.target)
 
     return self._get_obs()

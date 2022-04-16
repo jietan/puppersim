@@ -42,6 +42,9 @@ def get_serial_port():
 def main(argv):
   run_on_robot = FLAGS.run_on_robot
   reacher = load_reacher()
+  target_visual_shape = p.createVisualShape(p.GEOM_SPHERE, radius=0.015)
+  target_position = np.array([0,0,0])
+  sphere_id = p.createMultiBody(baseVisualShapeIndex=target_visual_shape, basePosition=target_position)
   
   joint_ids = []
   param_ids = []
@@ -98,6 +101,9 @@ def main(argv):
         # Actuator positions are stored in array: hardware_interface.robot_state.position, 
         # Actuator velocities are stored in array: hardware_interface.robot_state.velocity
 
+      end_effector_pos = reacher_kinematics.calculate_forward_kinematics_robot(joint_angles)
+      p.resetBasePositionAndOrientation(sphere_id, posObj=end_effector_pos, ornObj=[0, 0, 0, 1])
+      
       if counter % 5 == 0:
         print(reacher_kinematics.calculate_forward_kinematics_robot(joint_angles))
 
