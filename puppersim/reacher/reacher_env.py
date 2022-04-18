@@ -20,8 +20,8 @@ class ReacherEnv(gym.Env):
 
   def __init__(self, run_on_robot=False, render=False, render_meshes=False):
     self.action_space = gym.spaces.Box(
-        np.array([-1.5*math.pi, -1.5*math.pi, -2*math.pi]),
-        np.array([1.5*math.pi, 1.5*math.pi, 2*math.pi]),
+        np.array([-2*math.pi, -1.5*math.pi, -1.0*math.pi]),
+        np.array([2*math.pi, 1.5*math.pi, 1.0*math.pi]),
         dtype=np.float32)
     self.observation_space = gym.spaces.Box(
         # np.array([-1, -1, -1, -1, -1, -1, 0.05, 0.05, 0.05, -0.3, -0.3, -0.3]),
@@ -79,8 +79,8 @@ class ReacherEnv(gym.Env):
     possible_targets = []
     possible_targets.append(np.array([-0.07, -0.07, 0.07]))
     possible_targets.append(np.array([0.07, 0.07, 0.07]))
-    # possible_targets.append(np.array([-0.07, 0.07, 0.07]))
-    # possible_targets.append(np.array([0.07, -0.07, 0.07]))
+    possible_targets.append(np.array([-0.07, 0.07, 0.07]))
+    possible_targets.append(np.array([0.07, -0.07, 0.07]))
     self.target = random.choice(possible_targets)
     
     # self.target = np.array([0.07, 0.07, 0.07])
