@@ -89,7 +89,7 @@ class Worker(object):
         #assert self.policy_params['type'] == 'linear'
         return self.policy.get_weights_plus_stats()
     
-    def multi_rollout(self, rollout_length=None, shift=0.0, number_rollouts=12):
+    def multi_rollout(self, rollout_length=None, shift=0.0, number_rollouts=16):
       average_reward = 0.0
       total_steps = 0
 
@@ -487,13 +487,13 @@ if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--env_name', type=str, default='InvertedPendulumSwingupBulletEnv-v0')
-    parser.add_argument('--n_iter', '-n', type=int, default=1000)
+    parser.add_argument('--n_iter', '-n', type=int, default=2000)
     parser.add_argument('--n_directions', '-nd', type=int, default=16)
     parser.add_argument('--deltas_used', '-du', type=int, default=16)
     parser.add_argument('--step_size', '-s', type=float, default=0.03)
     parser.add_argument('--delta_std', '-std', type=float, default=.03)
     parser.add_argument('--n_workers', '-e', type=int, default=18)
-    parser.add_argument('--rollout_length', '-r', type=int, default=400)
+    parser.add_argument('--rollout_length', '-r', type=int, default=500)
 
     # for Swimmer-v1 and HalfCheetah-v1 use shift = 0
     # for Hopper-v1, Walker2d-v1, and Ant-v1 use shift = 1
@@ -507,7 +507,7 @@ if __name__ == '__main__':
     parser.add_argument('--filter', type=str, default='NoFilter')
     parser.add_argument('--activation', type=str, help="Neural network policy activation function, tanh or clip", default="tanh")
 
-    parser.add_argument('--policy_network_size', action='store', dest='policy_network_size_list',type=str, nargs='*', default='32,32')   
+    parser.add_argument('--policy_network_size', action='store', dest='policy_network_size_list',type=str, nargs='*', default='256,256')   
     args = parser.parse_args() 
     params = vars(args)
 

@@ -76,16 +76,15 @@ class ReacherEnv(gym.Env):
     # Target position: xy range of -0.1 to 0.1. z range of 0.05 to 0.15.
     # self.target = np.concatenate([np.random.uniform(-0.1, 0.1, 2), np.random.uniform(0.05, 0.15, 1)])
     
-    possible_targets = []
-    possible_targets.append(np.array([-0.07, -0.07, 0.07]))
-    possible_targets.append(np.array([0.07, 0.07, 0.07]))
-    possible_targets.append(np.array([-0.07, 0.07, 0.07]))
-    possible_targets.append(np.array([0.07, -0.07, 0.07]))
-    self.target = random.choice(possible_targets)
+    # possible_targets = []
+    # possible_targets.append(np.array([-0.07, -0.07, 0.07]))
+    # possible_targets.append(np.array([0.07, 0.07, 0.07]))
+    # possible_targets.append(np.array([-0.07, 0.07, 0.07]))
+    # possible_targets.append(np.array([0.07, -0.07, 0.07]))
+    # self.target = random.choice(possible_targets)
     
-    # self.target = np.array([0.07, 0.07, 0.07])
-    # target_angles = np.random.uniform(-0.5*math.pi, 0.5*math.pi, 3)
-    # self.target = reacher_kinematics.calculate_forward_kinematics_robot(target_angles)
+    target_angles = np.random.uniform(-0.5*math.pi, 0.5*math.pi, 3)
+    self.target = reacher_kinematics.calculate_forward_kinematics_robot(target_angles)
 
     self._target_visual_shape = self._bullet_client.createVisualShape(self._bullet_client.GEOM_SPHERE, radius=0.015)
     self._target_visualization = self._bullet_client.createMultiBody(baseVisualShapeIndex=self._target_visual_shape, basePosition=self.target)
