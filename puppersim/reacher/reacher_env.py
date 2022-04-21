@@ -55,7 +55,7 @@ class ReacherEnv(gym.Env):
     else:
       self.urdf_filename = "pupper_arm_no_mesh.urdf"
 
-  def reset(self):
+  def reset(self, target=None):
     if self._run_on_robot:
       return self._get_obs_on_robot()
     else:
@@ -82,9 +82,11 @@ class ReacherEnv(gym.Env):
     # possible_targets.append(np.array([-0.07, 0.07, 0.07]))
     # possible_targets.append(np.array([0.07, -0.07, 0.07]))
     # self.target = random.choice(possible_targets)
+
+    self.target = target if target is not None else np.array([0, 0, 0.1])
     
-    target_angles = np.random.uniform(-0.5*math.pi, 0.5*math.pi, 3)
-    self.target = reacher_kinematics.calculate_forward_kinematics_robot(target_angles)
+    # target_angles = np.random.uniform(-0.5*math.pi, 0.5*math.pi, 3)
+    # self.target = reacher_kinematics.calculate_forward_kinematics_robot(target_angles)
 
     self._target_visual_shape = self._bullet_client.createVisualShape(self._bullet_client.GEOM_SPHERE, radius=0.015)
     self._target_visualization = self._bullet_client.createMultiBody(baseVisualShapeIndex=self._target_visual_shape, basePosition=self.target)
@@ -108,7 +110,9 @@ class ReacherEnv(gym.Env):
       self._bullet_client.setJointMotorControl2(bodyIndex=self.robot_id,
                                      jointIndex=joint_id,
                                      controlMode=pybullet.POSITION_CONTROL,
-                                     targetPosition=action)                                
+                                     targetPosition=action,
+                                     maxVelocity=1000,
+                                     positionGain=0.3)                                
 
   def _apply_actions_on_robot(self, actions):
     full_actions = np.zeros([3, 4])
@@ -158,7 +162,7 @@ class ReacherEnv(gym.Env):
       ob = self._get_obs()
       self._bullet_client.stepSimulation()
 
-    reward_dist = -np.linalg.norm(self._get_vector_from_end_effector_to_goal())
+    reward_dist = -np.linalg.norm(self._get_vector_from_end_effector_to_goal())**2
     reward_ctrl = 0
     reward = reward_dist + reward_ctrl
 

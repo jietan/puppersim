@@ -13,6 +13,7 @@ import gym
 from packaging import version
 
 import arspb.logz as logz
+from puppersim.reacher import reacher_kinematics
 import ray
 import arspb.utils as utils
 import arspb.optimizers as optimizers
@@ -89,18 +90,34 @@ class Worker(object):
         #assert self.policy_params['type'] == 'linear'
         return self.policy.get_weights_plus_stats()
     
-    def multi_rollout(self, rollout_length=None, shift=0.0, number_rollouts=16):
+    def multi_rollout(self, targets=None, rollout_length=None, shift=0.0, number_rollouts=100):
       average_reward = 0.0
       total_steps = 0
 
+      # HARD CODE TARGETS
+      # targets = []
+      # targets.append(np.array([0.07, 0.07, 0.07]))
+      # targets.append(np.array([-0.07, -0.07, 0.07]))
+      # targets.append(np.array([-0.07, 0.07, 0.07]))
+      # targets.append(np.array([-0.07, -0.07, 0.07]))
+      # targets.append(np.array([0.04, -0.04, 0.07]))
+      # targets.append(np.array([0.04, 0.04, 0.07]))
+      # targets.append(np.array([-0.04, 0.04, 0.07]))
+      # targets.append(np.array([0.04, -0.04, 0.07]))
+      
+      # Random targets
+      np.random.seed(1)
+      targets = reacher_kinematics.random_reachable_points(100)
+
       for i in range(number_rollouts):
-        (total_reward, steps) = self.rollout(shift=shift, rollout_length=rollout_length)
+        target = targets[i%len(targets)] if targets is not None else None
+        (total_reward, steps) = self.rollout(shift=shift, rollout_length=rollout_length, target=target)
         average_reward += total_reward / number_rollouts
         total_steps += steps
       
       return average_reward, total_steps
 
-    def rollout(self, shift = 0., rollout_length = None):
+    def rollout(self, shift = 0., rollout_length = None, target=None, start_proportion=0.4):
         """ 
         Performs one rollout of maximum length rollout_length. 
         At each time-step it substracts shift from the reward.
@@ -112,10 +129,14 @@ class Worker(object):
         total_reward = 0.
         steps = 0
 
-        ob = self.env.reset()
+        if target is not None:
+          ob = self.env.reset(target)
+        else:
+          ob = self.env.reset()
         for i in range(rollout_length):
             action = self.policy.act(ob)
             ob, reward, done, _ = self.env.step(action)
+            reward = reward if i / rollout_length > start_proportion else 0
             steps += 1
             total_reward += (reward - shift)
             if done:
@@ -487,13 +508,13 @@ if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--env_name', type=str, default='InvertedPendulumSwingupBulletEnv-v0')
-    parser.add_argument('--n_iter', '-n', type=int, default=2000)
+    parser.add_argument('--n_iter', '-n', type=int, default=1000)
     parser.add_argument('--n_directions', '-nd', type=int, default=16)
     parser.add_argument('--deltas_used', '-du', type=int, default=16)
     parser.add_argument('--step_size', '-s', type=float, default=0.03)
     parser.add_argument('--delta_std', '-std', type=float, default=.03)
     parser.add_argument('--n_workers', '-e', type=int, default=18)
-    parser.add_argument('--rollout_length', '-r', type=int, default=500)
+    parser.add_argument('--rollout_length', '-r', type=int, default=50)
 
     # for Swimmer-v1 and HalfCheetah-v1 use shift = 0
     # for Hopper-v1, Walker2d-v1, and Ant-v1 use shift = 1
@@ -507,7 +528,7 @@ if __name__ == '__main__':
     parser.add_argument('--filter', type=str, default='NoFilter')
     parser.add_argument('--activation', type=str, help="Neural network policy activation function, tanh or clip", default="tanh")
 
-    parser.add_argument('--policy_network_size', action='store', dest='policy_network_size_list',type=str, nargs='*', default='256,256')   
+    parser.add_argument('--policy_network_size', action='store', dest='policy_network_size_list',type=str, nargs='*', default='64, 64')   
     args = parser.parse_args() 
     params = vars(args)
 
@@ -518,3 +539,27 @@ if __name__ == '__main__':
     finally:
       ray.shutdown()
 
+## 500 rollout length, 64, 64 one target achieveing like -3
+## 100 rollout length, 64, 64 one target ==> 
+
+## changed position gains
+## 100 rollout length, 64, 64. 8 targets ==> -5.9
+
+## change to norm-squared
+## 100 rollout length. linear policy. 8 targets ==> -0.71
+## 100 rollout length. 64, 64 tanh. 8 targets ==> -0.39
+
+## start_prop = 0.2
+## 100 rollout length. 64, 64 tanh. 8 targets ==> -0.19
+
+## 8 random targets chosen from angles
+## 100 rollout length. 64, 64 tanh. 8 random targets ==> -0.12
+## 100 rollout length. 64, 64 tanh. 20 random targets ==> -0.16
+
+## 50 rollout length. reward start at 0.4 (20 timesteps). 20 random targets ==> -0.06
+## 40 random targets
+
+### REALIZED RANDOM TARGETS WERE NOT BEING SEEDED CORRECTLY
+## 50 rollout length. reward start at 0.4 (20 timesteps). 20 random targets ==> -0.09
+## 50 rollout length. reward start at 0.4 (20 timesteps). 40 random targets ==> -0.08
+## 50 rollout length. reward start at 0.4. 100 random targets ==> -0.08 at 250 iters. -0.1 at 50 iters

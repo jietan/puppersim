@@ -18,6 +18,7 @@ from arspb.policies import *
 import time
 import arspb.trained_policies as tp
 import os
+import random
 
 #temp hack to create an envs_v2 pupper env
 
@@ -53,6 +54,7 @@ def main(argv):
   parser.add_argument("--log_to_file", default=False, action='store_true', help="Whether to log data to the disk.")
   parser.add_argument("--realtime", default=False, action='store_true', help="Run at realtime.")
   parser.add_argument("--render_meshes", default=False, action='store_true', help="Whether to render robot meshes.")
+  parser.add_argument("--rollout_length", type=int, default=200, help="Number of timesteps per rollout")
   
   if len(argv):
     args = parser.parse_args(argv)
@@ -122,7 +124,22 @@ def main(argv):
   }
   try: #for i in range(args.num_rollouts):
     while(True):
-      obs = env.reset()
+      # target = np.array([-0.07, -0.07, 0.07])
+      # possible_targets = []
+      # possible_targets.append(np.array([-0.07, -0.07, 0.07]))
+      # possible_targets.append(np.array([0.07, 0.07, 0.07]))
+      # possible_targets.append(np.array([-0.07, 0.07, 0.07]))
+      # possible_targets.append(np.array([0.04, -0.04, 0.07]))
+      # possible_targets.append(np.array([0.04, 0.04, 0.07]))
+      # possible_targets.append(np.array([-0.04, 0.04, 0.07]))
+      # possible_targets.append(np.array([0.04, -0.04, 0.07]))
+      from puppersim.reacher import reacher_kinematics
+      np.random.seed(0)
+      possible_targets = reacher_kinematics.random_reachable_points(100)
+
+      ## 8 possible targets gets -5
+      target = random.choice(possible_targets)
+      obs = env.reset(target)
       done = False
       totalr = 0.
       steps = 0
@@ -142,7 +159,7 @@ def main(argv):
           #   print(f"Cannot keep up with realtime. {-sleep_time:.2f} sec behind, "
           #         f"sim/wall ratio {(sim_elapsed/wall_elapsed):.2f}.")
           #   last_spammy_log = time.time()
-          time.sleep(0.01)
+          time.sleep(0.004)
 
         if args.profile:
           print("loop dt:", time.time() - start_time_wall)
@@ -155,6 +172,7 @@ def main(argv):
           observations.append(obs)
           actions.append(action)
         obs, r, done, _ = env.step(action)
+        print(steps)
         if args.log_to_file:
           log_dict['t'].append(env.robot.GetTimeSinceReset())
           log_dict['MotorAngle'].append(obs[0:12])
@@ -163,29 +181,30 @@ def main(argv):
 
         totalr += r
         steps += 1
-        if steps > 100:
+        if steps > args.rollout_length:
           break
 
         if args.profile:
           print('policy.act(obs): ', after_policy - before_policy)
           print('wallclock_control_code: ', time.time() - start_time_wall)
-    returns.append(totalr)
+      returns.append(totalr)
   finally:
     if args.log_to_file:
       print("logging to file...")
       with open("env_ars_log.txt", "wb") as f:
         pickle.dump(log_dict, f)
 
-  print('returns: ', returns)
-  print('mean return: ', np.mean(returns))
-  print('std of return: ', np.std(returns))
+    print(f'ran {len(returns)} rollouts')
+    print('returns: ', returns)
+    print('mean return: ', np.mean(returns))
+    print('std of return: ', np.std(returns))
 
-  if args.plot and not args.run_on_robot:
-    import matplotlib.pyplot as plt
-    action_history = np.array(actions)
-    observation_history = np.array(observations)
-    plt.plot(action_history)
-    plt.show()
+    if args.plot and not args.run_on_robot:
+      import matplotlib.pyplot as plt
+      action_history = np.array(actions)
+      observation_history = np.array(observations)
+      plt.plot(action_history)
+      plt.show()
 
 if __name__ == '__main__':
   import sys
