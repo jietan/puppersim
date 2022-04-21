@@ -17,3 +17,4 @@ python reacher_ars_run_policy.py  --expert_policy_file  data/lin_policy_plus_lat
 
 ### Available flags
 * ``--render_meshes`` to show the realistic robot model. By default the simulator will only show a simple model of the robot.
+* ``--rollout_length`` number of timesteps (dt=1/240) per rollout. The target will change after each rollout. Default is 200.
