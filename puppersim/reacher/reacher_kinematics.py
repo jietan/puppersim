@@ -1,4 +1,3 @@
-from puppersim.reacher import reacher_env
 import math
 import time
 import numpy as np
@@ -6,6 +5,21 @@ import numpy as np
 HIP_OFFSET = 0.0335
 L1 = 0.08
 L2 = 0.11
+
+
+def random_reachable_points(N, base_lb=-np.pi/4, base_ub=np.pi/4, shoulder_lb=0, shoulder_ub=np.pi/2,
+                            elbow_lb=0, elbow_ub=np.pi/2):
+  """Bounds are in radians"""
+  X = []
+  for i in range(N):
+    target_angles = np.concatenate([
+        np.random.uniform(base_lb, base_ub, 1),
+        np.random.uniform(shoulder_lb, shoulder_ub, 1),
+        np.random.uniform(elbow_lb, elbow_ub, 1)
+    ])
+    target = calculate_forward_kinematics_robot(target_angles)
+    X.append(target)
+  return X
 
 
 def calculate_forward_kinematics_robot(joint_angles):
@@ -29,13 +43,12 @@ def calculate_forward_kinematics_robot(joint_angles):
 
   foot_pos = np.array([[HIP_OFFSET], [y1 + y2], [z1 + z2]])
 
-  rot_mat = np.array(
-      [[math.cos(base_angle), -math.sin(base_angle), 0],
-       [math.sin(base_angle),
-        math.cos(base_angle), 0], [0, 0, 1]])
+  rot_mat = np.array([[math.cos(base_angle), -math.sin(base_angle), 0],
+                      [math.sin(base_angle),
+                       math.cos(base_angle), 0], [0, 0, 1]])
 
   end_effector_pos = rot_mat @ foot_pos
-  return end_effector_pos[:,0]
+  return end_effector_pos[:, 0]
 
 
 def ik_cost(end_effector_pos, guess):
