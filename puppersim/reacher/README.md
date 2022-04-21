@@ -1,6 +1,7 @@
 # Reacher instructions
 ## Training
 ```bash
+conda activate rl_pupper
 cd puppersim/reacher
 python reacher_ars_train.py --policy_type=nn
 ```
@@ -11,6 +12,7 @@ python reacher_ars_train.py --policy_type=nn
 
 ## Running policy
 ```bash
+conda activate rl_pupper
 cd puppersim/reacher 
 python reacher_ars_run_policy.py  --expert_policy_file  data/lin_policy_plus_latest.npz  --json_file data/params.json --render --realtime
 ```
