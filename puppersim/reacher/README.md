@@ -6,7 +6,7 @@ python reacher_ars_train.py --policy_type=nn
 ```
 ### Available flags
 * ``--policy_type={nn or linear}``. Choose neural network or linear policy. Default is linear. Pass ``--policy_type=nn`` for neural network policy.
-* ``--rollout_length={integer}``. Number of timesteps for each rollout. Each timestep is 1/240 seconds long. Default is 500.
+* ``--rollout_length={integer}``. Number of timesteps for each rollout. Each timestep is 1/240 seconds long. Default is 50.
 * ``--n_iter={integer}``. Number of iterations to run ARS for. Default is 1000.
 
 ## Running policy
