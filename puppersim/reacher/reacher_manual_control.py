@@ -38,7 +38,7 @@ def load_reacher():
                                cameraPitch=-30,
                                cameraTargetPosition=[0, 0, 0.1])
 
-  URDF_PATH = pd.getDataPath() + "/pupper_arm.urdf"
+  URDF_PATH = pd.getDataPath() + "/pupper_arms_dual.urdf"
   return p.loadURDF(URDF_PATH, useFixedBase=True)
 
 
@@ -93,7 +93,7 @@ def main(argv):
       print(time.time() - last_command)
       last_command = time.time()
       counter += 1
-      joint_angles = np.zeros(3)
+      joint_angles = np.zeros(6)
       for i in range(len(param_ids)):
         c = param_ids[i]
         targetPos = p.readUserDebugParameter(c)
