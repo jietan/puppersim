@@ -74,21 +74,22 @@ def main(argv):
 
       if run_on_robot:
         full_actions = np.zeros([3, 4])
-        full_actions[:, 3] = np.reshape(joint_angles, 3)
+        full_actions[:, 3] = np.reshape(joint_angles, -1)[:3]
+        full_actions[:, 2] = np.reshape(joint_angles, -1)[3:]
 
         hardware_interface.set_actuator_postions(np.array(full_actions))
         # Actuator positions are stored in array: hardware_interface.robot_state.position,
         # Actuator velocities are stored in array: hardware_interface.robot_state.velocity
 
       end_effector_pos = reacher_kinematics.calculate_forward_kinematics_robot(
-          joint_angles)
+          joint_angles[:3])
       p.resetBasePositionAndOrientation(sphere_id,
                                         posObj=end_effector_pos,
                                         ornObj=[0, 0, 0, 1])
 
       if counter % 5 == 0:
         print(
-            reacher_kinematics.calculate_forward_kinematics_robot(joint_angles))
+            reacher_kinematics.calculate_forward_kinematics_robot(joint_angles[:3]))
 
 
 app.run(main)

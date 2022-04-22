@@ -8,7 +8,7 @@
         <inertia ixx="1e-03" ixy="0" ixz="0" iyy="1e-03" iyz="0" izz="1e-03"/>
       </inertial>
       <visual name="Base">
-        <origin xyz="0 0 -0.032" rpy="1.5708 0 -1.5708"/>
+        <origin xyz="0 0 -0.032" rpy="1.5708 0 1.5708"/>
         <geometry>
           <mesh filename="meshes/stand.obj" scale="0.001 0.001 0.001"/>
         </geometry>
@@ -101,62 +101,6 @@
         </geometry>
       </collision>
     </link>
-
-    <!-- <link name="rightFrontLeg">
-      <inertial>
-        <origin xyz="0.0139 -0.0269 0" rpy="0 0 0"/>
-        <mass value="0.106"/>
-        <inertia ixx="2e-05" ixy="0" ixz="0" iyy="6e-05" iyz="0" izz="6e-05"/>
-      </inertial>
-      <collision name="Hip R">
-        <origin xyz="0.0235 -0.028 0" rpy="1.5708 0 -1.5708"/>
-        <geometry>
-          <cylinder radius="0.015" length="0.075"/>
-        </geometry>
-      </collision>
-    </link>
-
-    <link name="rightFrontLowerLeg">
-      <inertial>
-        <origin xyz="-0.00588 -0.00075 -0.0658" rpy="0 0 0"/>
-        <mass value="0.038"/>
-        <inertia ixx="0.00018" ixy="0" ixz="0" iyy="0.00018" iyz="0" izz="2e-05"/>
-      </inertial>
-      <collision name="Lower Leg R">
-        <origin xyz="-0.00698 0 -0.05223" rpy="0 0 0"/>
-        <geometry>
-          <box size="0.00953 0.012 0.10758"/>
-        </geometry>
-      </collision>
-    </link>
-
-    <link name="rightFrontToe">
-      <inertial>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
-        <mass value="0.0001"/>
-        <inertia ixx="2e-05" ixy="0" ixz="0" iyy="2e-05" iyz="0" izz="2e-05"/>
-      </inertial>
-      <collision name="Sphere.002">
-        <origin xyz="0 0 0" rpy="0 0 0"/>
-        <geometry>
-          <sphere radius="0.0095"/>
-        </geometry>
-      </collision>
-    </link>
-
-    <link name="rightFrontUpperLeg">
-      <inertial>
-        <origin xyz="0.0172 0 -0.061" rpy="0 0 0"/>
-        <mass value="0.142"/>
-        <inertia ixx="0.00014" ixy="0" ixz="0" iyy="0.00016" iyz="0" izz="3e-05"/>
-      </inertial>
-      <collision name="Upper Leg - Pupper 2.1 v57">
-        <origin xyz="0.0169 0 -0.08" rpy="1.5708 0 -1.5708"/>
-        <geometry>
-          <cylinder radius="0.015" length="0.065"/>
-        </geometry>
-      </collision>
-    </link>    -->
 
     <link name="rightFrontLeg">
       <inertial>
