@@ -61,7 +61,7 @@ def main(argv):
     if time.time() - last_command > UPDATE_DT:
       last_command = time.time()
       counter += 1
-      joint_angles = np.zeros(3)
+      joint_angles = np.zeros(6)
       for i in range(len(param_ids)):
         c = param_ids[i]
         targetPos = p.readUserDebugParameter(c)
