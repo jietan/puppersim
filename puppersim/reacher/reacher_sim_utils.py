@@ -22,7 +22,7 @@ def load_reacher():
                                cameraPitch=-30,
                                cameraTargetPosition=[0, 0, 0.1])
 
-  URDF_PATH = pd.getDataPath() + "/pupper_arm.urdf"
+  URDF_PATH = pd.getDataPath() + "/pupper_arms_dual.urdf"
   return p.loadURDF(URDF_PATH, useFixedBase=True)
 
 
