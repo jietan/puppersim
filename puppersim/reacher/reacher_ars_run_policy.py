@@ -171,7 +171,7 @@ def main(argv):
           observations.append(obs)
           actions.append(action)
         obs, r, done, _ = env.step(action)
-        print(steps)
+        print(f"Target: {target}\tRollout step: {steps}")
         if args.log_to_file:
           log_dict['t'].append(env.robot.GetTimeSinceReset())
           log_dict['MotorAngle'].append(obs[0:12])
