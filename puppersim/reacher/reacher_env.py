@@ -14,8 +14,8 @@ import puppersim.data as pd
 from puppersim.reacher import reacher_kinematics
 from serial.tools import list_ports
 
-KP = 4.0
-KD = 4.0
+KP = 6.0
+KD = 1.0
 MAX_CURRENT = 4.0
 
 
