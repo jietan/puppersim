@@ -13,6 +13,7 @@ import gym
 from packaging import version
 
 import arspb.logz as logz
+from puppersim.reacher import reacher_kinematics
 import ray
 import arspb.utils as utils
 import arspb.optimizers as optimizers
@@ -89,8 +90,30 @@ class Worker(object):
         #assert self.policy_params['type'] == 'linear'
         return self.policy.get_weights_plus_stats()
     
+    def multi_rollout(self, targets=None, rollout_length=None, shift=0.0, number_rollouts=100):
+      average_reward = 0.0
+      total_steps = 0
 
-    def rollout(self, shift = 0., rollout_length = None):
+      # HARD CODED TARGETS
+      # targets = []
+      # targets.append(np.array([0.07, 0.07, 0.07]))
+      # targets.append(np.array([0.07, -0.07, 0.07]))
+      # targets.append(np.array([-0.07, 0.07, 0.07]))
+      # targets.append(np.array([-0.07, -0.07, 0.07]))
+      
+      # Random targets
+      np.random.seed(0)
+      targets = reacher_kinematics.random_reachable_points(100)
+
+      for i in range(number_rollouts):
+        target = targets[i%len(targets)] if targets is not None else None
+        (total_reward, steps) = self.rollout(shift=shift, rollout_length=rollout_length, target=target)
+        average_reward += total_reward / number_rollouts
+        total_steps += steps
+      
+      return average_reward, total_steps
+
+    def rollout(self, shift = 0., rollout_length = None, target=None, start_proportion=0.4):
         """ 
         Performs one rollout of maximum length rollout_length. 
         At each time-step it substracts shift from the reward.
@@ -102,10 +125,14 @@ class Worker(object):
         total_reward = 0.
         steps = 0
 
-        ob = self.env.reset()
+        if target is not None:
+          ob = self.env.reset(target)
+        else:
+          ob = self.env.reset()
         for i in range(rollout_length):
             action = self.policy.act(ob)
             ob, reward, done, _ = self.env.step(action)
+            reward = reward if i / rollout_length > start_proportion else 0
             steps += 1
             total_reward += (reward - shift)
             if done:
@@ -132,7 +159,8 @@ class Worker(object):
 
                 # for evaluation we do not shift the rewards (shift = 0) and we use the
                 # default rollout length (1000 for the MuJoCo locomotion tasks)
-                reward, r_steps = self.rollout(shift = 0., rollout_length = self.rollout_length)
+                # reward, r_steps = self.rollout(shift = 0., rollout_length = self.rollout_length)
+                reward, r_steps = self.multi_rollout(shift=0, rollout_length=self.rollout_length)
                 rollout_rewards.append(reward)
                 
             else:
@@ -146,11 +174,13 @@ class Worker(object):
 
                 # compute reward and number of timesteps used for positive perturbation rollout
                 self.policy.update_weights(w_policy + delta)
-                pos_reward, pos_steps  = self.rollout(shift = shift)
+                # pos_reward, pos_steps  = self.rollout(shift = shift)
+                pos_reward, pos_steps  = self.multi_rollout(shift = shift)
 
                 # compute reward and number of timesteps used for negative pertubation rollout
                 self.policy.update_weights(w_policy - delta)
-                neg_reward, neg_steps = self.rollout(shift = shift) 
+                # neg_reward, neg_steps = self.rollout(shift = shift) 
+                neg_reward, neg_steps = self.multi_rollout(shift = shift) 
                 steps += pos_steps + neg_steps
 
                 rollout_rewards.append([pos_reward, neg_reward])
@@ -480,7 +510,7 @@ if __name__ == '__main__':
     parser.add_argument('--step_size', '-s', type=float, default=0.03)
     parser.add_argument('--delta_std', '-std', type=float, default=.03)
     parser.add_argument('--n_workers', '-e', type=int, default=18)
-    parser.add_argument('--rollout_length', '-r', type=int, default=400)
+    parser.add_argument('--rollout_length', '-r', type=int, default=50)
 
     # for Swimmer-v1 and HalfCheetah-v1 use shift = 0
     # for Hopper-v1, Walker2d-v1, and Ant-v1 use shift = 1
@@ -494,7 +524,7 @@ if __name__ == '__main__':
     parser.add_argument('--filter', type=str, default='NoFilter')
     parser.add_argument('--activation', type=str, help="Neural network policy activation function, tanh or clip", default="tanh")
 
-    parser.add_argument('--policy_network_size', action='store', dest='policy_network_size_list',type=str, nargs='*', default='32,32')   
+    parser.add_argument('--policy_network_size', action='store', dest='policy_network_size_list',type=str, nargs='*', default='64, 64')   
     args = parser.parse_args() 
     params = vars(args)
 
@@ -505,3 +535,13 @@ if __name__ == '__main__':
     finally:
       ray.shutdown()
 
+
+################ Experiment results ###############
+# After fixing randomized target seeding
+
+# Set the number of rollouts per perturbation to be equal to num random targets
+# 50 rollout length. reward start at 0.4 (20 timesteps). 20 random targets ==> -0.09
+# 50 rollout length. reward start at 0.4 (20 timesteps). 40 random targets ==> -0.08
+# 50 rollout length. reward start at 0.4. 100 random targets ==> -0.08 at 250 iters. -0.1 at 50 iters
+# 50 rollout length. reward start at 0.4. 3 fixed targets ==> -0.002 at 1000 iters. 
+# 50 rollout length. reward start at 0.4. 4 fixed targets ==> -0.02 at 1000 iters. Probably worse error due to greater yaw possibilities

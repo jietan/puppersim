@@ -254,8 +254,8 @@ class ReacherEnv(gym.Env):
             )[0]
         return np.array(end_effector_pos) - np.array(self.target)
 
-    def shutdown(self):
-        # TODO: Added this function to attempt to gracefully close
-        # the serial connection to the Teensy so that the robot
-        # does not jerk, but it doesn't actually work
-        self._hardware_interface.serial_handle.close()
+  def shutdown(self):
+    # TODO: Added this function to attempt to gracefully close
+    # the serial connection to the Teensy so that the robot
+    # does not jerk, but it doesn't actually work
+    self._hardware_interface.serial_handle.close()
