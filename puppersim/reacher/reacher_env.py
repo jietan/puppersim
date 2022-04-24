@@ -85,12 +85,15 @@ class ReacherEnv(gym.Env):
             low=np.ones(obs_shape) * -np.inf, high=np.ones(obs_shape) * np.inf
         )
 
-    def reset(self):
-        # new random target
-        target_angles = np.random.uniform(-0.5 * math.pi, 0.5 * math.pi, 3)
-        self.target = reacher_kinematics.calculate_forward_kinematics_robot(
-            target_angles
-        )
+    def reset(self, target=None):
+        if target is None:
+            # new random target
+            target_angles = np.random.uniform(-0.5 * math.pi, 0.5 * math.pi, 3)
+            self.target = reacher_kinematics.calculate_forward_kinematics_robot(
+                target_angles
+            )
+        else:
+            self.target = target
 
         if self._run_on_robot:
             reacher_robot_utils.blocking_move(
@@ -254,8 +257,8 @@ class ReacherEnv(gym.Env):
             )[0]
         return np.array(end_effector_pos) - np.array(self.target)
 
-  def shutdown(self):
-    # TODO: Added this function to attempt to gracefully close
-    # the serial connection to the Teensy so that the robot
-    # does not jerk, but it doesn't actually work
-    self._hardware_interface.serial_handle.close()
+    def shutdown(self):
+        # TODO: Added this function to attempt to gracefully close
+        # the serial connection to the Teensy so that the robot
+        # does not jerk, but it doesn't actually work
+        self._hardware_interface.serial_handle.close()
