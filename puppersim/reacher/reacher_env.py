@@ -24,9 +24,10 @@ class ReacherEnv(gym.Env):
         self,
         run_on_robot=False,
         render=False,
-        torque_control=True,
+        torque_control=False,
         torque_penalty=0.0,
         render_meshes=False,
+        expand_observation=False,
         leg_index=3,
     ):
         if torque_control:
@@ -39,11 +40,12 @@ class ReacherEnv(gym.Env):
         else:
             self._motor_control = pybullet.POSITION_CONTROL
             self.action_space = gym.spaces.Box(
-                np.array([-0.9 * math.pi, -0.8 * math.pi, -math.pi]),
-                np.array([0.9 * math.pi, 0.8 * math.pi, math.pi]),
+                np.array([-2.0 * math.pi, -1.5 * math.pi, -math.pi]),
+                np.array([2.0 * math.pi, 1.5 * math.pi, math.pi]),
                 dtype=np.float32,
             )
 
+        self.expand_observation = expand_observation
         self._leg_index = leg_index
         self.torque_penalty = torque_penalty
         self._run_on_robot = run_on_robot
@@ -148,7 +150,8 @@ class ReacherEnv(gym.Env):
                     jointIndex=joint_id,
                     controlMode=self._motor_control,
                     targetPosition=action,
-                    maxVelocity=1,
+                    maxVelocity=1000,
+                    positionGain=0.3,
                 )
             else:
                 self._bullet_client.setJointMotorControl2(
@@ -177,16 +180,20 @@ class ReacherEnv(gym.Env):
         )
         joint_angles = [joint_data[0] for joint_data in joint_states][0:3]
         joint_velocities = [joint_data[1] for joint_data in joint_states][0:3]
-        return np.concatenate(
-            [
-                np.cos(joint_angles),
-                np.sin(joint_angles),
-                self.target,
-                self._get_vector_from_end_effector_to_goal(),
-                # keep velocities in reasonable range
-                np.array(joint_velocities) / 20.0,
-            ]
-        )
+
+        if self.expand_observation:
+            return np.concatenate(
+                [
+                    np.cos(joint_angles),
+                    np.sin(joint_angles),
+                    self.target,
+                    self._get_vector_from_end_effector_to_goal(),
+                    # keep velocities in reasonable range
+                    np.array(joint_velocities) / 20.0,
+                ]
+            )
+        else:
+            return self.target
 
     def _get_obs_on_robot(self):
         self._hardware_interface.read_incoming_data()
@@ -198,16 +205,19 @@ class ReacherEnv(gym.Env):
             self._leg_index * 3 : self._leg_index * 3 + 3
         ]
 
-        return np.concatenate(
-            [
-                np.cos(joint_angles),
-                np.sin(joint_angles),
-                self.target,
-                self._get_vector_from_end_effector_to_goal(),
-                # keep velocities in reasonable range
-                np.array(joint_velocities) / 20.0,
-            ]
-        )
+        if self.expand_observation:
+            return np.concatenate(
+                [
+                    np.cos(joint_angles),
+                    np.sin(joint_angles),
+                    self.target,
+                    self._get_vector_from_end_effector_to_goal(),
+                    # keep velocities in reasonable range
+                    np.array(joint_velocities) / 20.0,
+                ]
+            )
+        else:
+            return self.target
 
     def step(self, actions):
         if self._run_on_robot:
