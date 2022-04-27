@@ -211,7 +211,7 @@
     </joint>
 
     <joint name="leftBaseMotor" type="revolute">
-      <origin xyz="0 0 -0.025" rpy="1.5708 0 0"/>
+      <origin xyz="0 0 -0.025" rpy="1.5708 0 -1.5708"/>
       <parent link="base"/>
       <child link="leftFrontLeg"/>
       <axis xyz="0 -1.0 0"/>
@@ -222,7 +222,7 @@
       <origin xyz="-0.004 0 -0.08" rpy="0 0 3.14159"/>
       <parent link="rightFrontUpperLeg"/>
       <child link="rightFrontLowerLeg"/>
-      <axis xyz="-1.0 0 0"/>
+      <axis xyz="1.0 0 0"/>
       <limit lower="-2.87979" upper="2.87979" effort="0" velocity="0"/>
     </joint>
 
@@ -241,7 +241,7 @@
     </joint>
 
     <joint name="rightBaseMotor" type="revolute">
-      <origin xyz="0 -0.16 -0.025" rpy="-1.5708 0 0"/>
+      <origin xyz="0 0.16 -0.025" rpy="-1.5708 0 1.5708"/>
       <parent link="base"/>
       <child link="rightFrontLeg"/>
       <axis xyz="0 1.0 0"/>

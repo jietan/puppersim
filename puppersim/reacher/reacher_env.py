@@ -56,7 +56,7 @@ class ReacherEnv(gym.Env):
             self._bullet_client.COV_ENABLE_GUI, 0)
         self._bullet_client.resetDebugVisualizerCamera(
             cameraDistance=0.3,
-            cameraYaw=-134,
+            cameraYaw=46,
             cameraPitch=-30,
             cameraTargetPosition=[0, 0, 0.1])
       else:

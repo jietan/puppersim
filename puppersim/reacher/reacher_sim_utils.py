@@ -16,9 +16,10 @@ def load_reacher():
   p.configureDebugVisualizer(p.COV_ENABLE_RGB_BUFFER_PREVIEW, 0)
   p.configureDebugVisualizer(p.COV_ENABLE_DEPTH_BUFFER_PREVIEW, 0)
   p.configureDebugVisualizer(p.COV_ENABLE_SEGMENTATION_MARK_PREVIEW, 0)
+  p.configureDebugVisualizer(p.COV_ENABLE_SHADOWS, 0)
   p.setAdditionalSearchPath(pybullet_data.getDataPath())
-  p.resetDebugVisualizerCamera(cameraDistance=0.3,
-                               cameraYaw=-134,
+  p.resetDebugVisualizerCamera(cameraDistance=0.5,
+                               cameraYaw=46,
                                cameraPitch=-30,
                                cameraTargetPosition=[0, 0, 0.1])
 
