@@ -97,7 +97,7 @@ class PupperRobot(quadruped_base.QuadrupedBase):
     # self.receive_observation()
 
 
-    joint_angles = [0, 0.6, -1.2] * 4
+    joint_angles = [-0.2, 0.5, -1.2, 0.2, 0.5, -1.2, -0.2, 0.5, -1.2, 0.2, 0.5 ,-1.2]
     super().reset(base_position, base_orientation_quaternion, joint_angles)
 
     # Receive another state at the end of the reset sequence. Though it is
@@ -139,7 +139,6 @@ class PupperRobot(quadruped_base.QuadrupedBase):
     # Get an initial state.
     self._get_state()
     initial_motor_angles = self.motor_angles
-
     sequence_start_time = self._clock()
     time_since_start = 0
     while time_since_start < duration:

@@ -14,7 +14,7 @@ import pickle
 from pybullet_envs.minitaur.envs_v2 import env_loader
 import pybullet as p
 import puppersim
-
+import keyboard_utils
 import os
 
 
@@ -39,6 +39,30 @@ def _load_config(render=False):
   gin.parse_config_file(config_file)
   gin.bind_parameter("SimulationParameters.enable_rendering", render)
 
+def _update_speed_from_kb(kb, lin_speed, ang_speed):
+  """Updates the controller behavior parameters."""
+  if kb.is_keyboard_hit():
+    c = kb.get_input_character()
+    if c == "w":
+      lin_speed += np.array((0.0, -0.1))
+    if c == "s":
+      lin_speed += np.array((0.0, 0.1))
+    if c == "q":
+      ang_speed += 0.2
+    if c == "e":
+      ang_speed += -0.2
+    if c == "a":
+      lin_speed += np.array((0.1, 0.0))
+    if c == "d":
+      lin_speed += np.array((-0.1, 0.0))
+    if c == "r":
+      lin_speed = np.array([0.0, 0.0])
+      ang_speed = 0.0
+
+    lin_speed[0] = np.clip(lin_speed[0], -1.0, 1.5)
+    lin_speed[1] = np.clip(lin_speed[1], -0.8, 0.8)
+    ang_speed = np.clip(ang_speed, -1.2, 1.2)
+  return lin_speed, ang_speed
 
 class IsaacGymPolicy(object):
 
@@ -64,7 +88,10 @@ class IsaacGymPolicy(object):
 
     actor_critic_policy.eval()
     self.last_action = np.zeros(12)
-    self.default_dof_pos = np.array([0, 0.5, -1.2] * 4)
+    self.default_dof_pos = np.array([-0.2, 0.5, -1.2,
+                                     0.2, 0.5, -1.2,
+                                     -0.2, 0.5, -1.2,
+                                     0.2, 0.5, -1.2])
 
     self.device = device
     self.policy = actor_critic_policy.act_inference
@@ -116,10 +143,14 @@ def run_example(num_max_steps=_NUM_STEPS):
   Args:
     num_max_steps: Maximum number of steps this example should run for.
   """
-  path = '/home/pi/oct_29_model2.pt'
+  path = '/home/pi/nov_6_model1.pt'
   device = 'cpu'
 
   policy = IsaacGymPolicy(path, device)
+
+  keyboard_control = keyboard_utils.KeyboardInput()
+  lin_speed = np.array([0.0, 0.0])
+  ang_speed = 0.0
 
   env = env_loader.load()
   env.seed(_ENV_RANDOM_SEED)
@@ -148,7 +179,7 @@ def run_example(num_max_steps=_NUM_STEPS):
       if FLAGS.realtime or FLAGS.run_on_robot:
         # Sync to real time.
         wall_elapsed = time.time() - env_start_wall
-        sim_elapsed = (i+1) * 0.02 # env.env_time_step
+        sim_elapsed = (i+1) * 0.03 # env.env_time_step
         sleep_time = sim_elapsed - wall_elapsed
         if sleep_time > 0:
           time.sleep(sleep_time)
@@ -158,7 +189,12 @@ def run_example(num_max_steps=_NUM_STEPS):
           last_spammy_log = time.time()
 
       before_step_timestamp = time.time()
-      obs['command'] = [-0.6, -0.0, 0]
+
+      lin_speed, ang_speed = _update_speed_from_kb(
+                keyboard_control, lin_speed, ang_speed)
+
+
+      obs['command'] = [lin_speed[0], lin_speed[1], ang_speed]
 
       action = policy.step(obs)
       #print('motor_targets', action)
@@ -187,3 +223,4 @@ def main(_):
 
 if __name__ == "__main__":
   app.run(main)
+
