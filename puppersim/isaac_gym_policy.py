@@ -15,6 +15,7 @@ from pybullet_envs.minitaur.envs_v2 import env_loader
 import pybullet as p
 import puppersim
 import keyboard_utils
+from JoystickInterface import JoystickInterface
 import os
 
 
@@ -148,7 +149,8 @@ def run_example(num_max_steps=_NUM_STEPS):
 
   policy = IsaacGymPolicy(path, device)
 
-  keyboard_control = keyboard_utils.KeyboardInput()
+  #keyboard_control = keyboard_utils.KeyboardInput()
+  joystick_control = JoystickInterface(config=None)
   lin_speed = np.array([0.0, 0.0])
   ang_speed = 0.0
 
@@ -190,11 +192,11 @@ def run_example(num_max_steps=_NUM_STEPS):
 
       before_step_timestamp = time.time()
 
-      lin_speed, ang_speed = _update_speed_from_kb(
-                keyboard_control, lin_speed, ang_speed)
-
-
-      obs['command'] = [lin_speed[0], lin_speed[1], ang_speed]
+      #lin_speed, ang_speed = _update_speed_from_kb(
+      #          keyboard_control, lin_speed, ang_speed)
+      #obs['command'] = [lin_speed[0], lin_speed[1], ang_speed]
+      joystick_command = joystick_control.get_command(None)
+      obs['command'] = [-joystick_command['horizontal_velocity'][1], -joystick_command['horizontal_velocity'][0], -joystick_command['yaw_rate']]
 
       action = policy.step(obs)
       #print('motor_targets', action)
