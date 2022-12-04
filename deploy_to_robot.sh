@@ -3,7 +3,7 @@
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
   REMOTE=`avahi-resolve-host-name raspberrypi.local -4 | awk '{print $2}'`
 elif [[ "$OSTYPE" == "darwin"* ]]; then
-  REMOTE=raspberrypi.local
+  REMOTE=192.168.1.100 #raspberrypi.local
 else
   print "not supported os"
   exit 1
