@@ -22,6 +22,8 @@ conda activate rl_pupper
 pip install ray arspb
 ```
 
+**NOTE:** If using your own virtual environment, use python 3.7 and install ray arspb.
+
 ## Getting the code ready
 ```bash
 git clone https://github.com/jietan/puppersim.git
