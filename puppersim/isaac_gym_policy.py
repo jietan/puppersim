@@ -24,6 +24,8 @@ flags.DEFINE_bool("profile", False, "Whether to print timing results for differe
 flags.DEFINE_bool("run_on_robot", False, "Whether to run on robot or in simulation.")
 flags.DEFINE_bool("log_to_file", False, "Whether to log data to the disk.")
 flags.DEFINE_bool("realtime", False, "Run at realtime.")
+flags.DEFINE_string("checkpoint", '/home/pi/nov_6_model1.pt', 'Path to the checkpoint')
+
 FLAGS = flags.FLAGS
 CONFIG_DIR = puppersim.getPupperSimPath()
 _NUM_STEPS = 100000
@@ -144,7 +146,7 @@ def run_example(num_max_steps=_NUM_STEPS):
   Args:
     num_max_steps: Maximum number of steps this example should run for.
   """
-  path = '/home/pi/nov_6_model1.pt'
+  path = FLAGS.checkpoint
   device = 'cpu'
 
   policy = IsaacGymPolicy(path, device)
