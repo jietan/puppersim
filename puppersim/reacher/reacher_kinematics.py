@@ -23,32 +23,40 @@ def random_reachable_points(N, base_lb=-np.pi/4, base_ub=np.pi/4, shoulder_lb=0,
 
 
 def calculate_forward_kinematics_robot(joint_angles):
-  """Compute end effector pos in cartesian cords given angles
-
-  Args:
-    joint_angles: np array with elements (base, shoulder, elbow). Radians
-  
-  Returns:
-    Position of end-effector in meters, np array (x, y, z)
-  """
-  base_angle = -joint_angles[0]
-  shoulder_angle = -joint_angles[1]
-  elbow_angle = -joint_angles[2]
-
-  y1 = L1 * math.sin(shoulder_angle)
-  z1 = L1 * math.cos(shoulder_angle)
-
-  y2 = L2 * math.sin(shoulder_angle + elbow_angle)
-  z2 = L2 * math.cos(shoulder_angle + elbow_angle)
-
-  foot_pos = np.array([[HIP_OFFSET], [y1 + y2], [z1 + z2]])
-
-  rot_mat = np.array([[math.cos(base_angle), -math.sin(base_angle), 0],
-                      [math.sin(base_angle),
-                       math.cos(base_angle), 0], [0, 0, 1]])
-
-  end_effector_pos = rot_mat @ foot_pos
-  return end_effector_pos[:, 0]
+    """Calculate xyz coordinates of end-effector given joint angles.
+    Use forward kinematics equations to calculate the xyz coordinates of the end-effector
+    given some joint angles.
+    Args:
+      joint_angles: numpy array of 3 elements [base, shoulder, elbow]. Numpy array of 3 elements.
+    Returns:
+      xyz coordinates (in meters) of the end-effector in the arm frame. Numpy array of 3 elements.
+    """
+    theta_1, theta_2, theta_3 = joint_angles
+    r_c0_e = np.array([0, 0, L2])
+    R_b_c = np.array(
+      [
+        [math.cos(theta_3), 0, -math.sin(theta_3)],
+        [0, 1, 0],
+        [math.sin(theta_3), 0, math.cos(theta_3)]
+      ]
+    )
+    R_a_b = np.array(
+      [
+        [math.cos(theta_2), 0, -math.sin(theta_2)],
+        [0, 1, 0],
+        [math.sin(theta_2), 0, math.cos(theta_2)]
+      ]
+    )
+    R_n_a = np.array(
+      [
+        [math.cos(-theta_1), -math.sin(-theta_1), 0],
+        [math.sin(-theta_1), math.cos(-theta_1), 0],
+        [0, 0, 1]
+      ]
+    )
+    r_b0_e = np.array([0, 0, L1]) + np.dot(R_b_c, r_c0_e)
+    r_a0_e = np.array([0, -HIP_OFFSET, 0]) + np.dot(R_a_b, r_b0_e)
+    return np.dot(R_n_a, r_a0_e)
 
 
 def ik_cost(end_effector_pos, guess):
